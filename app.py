@@ -2,18 +2,20 @@ from flask import Flask, jsonify,session,redirect,url_for,render_template,reques
 
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
-from google_auth_oauthlib.flow import Flow
+from google.auth.transport.requests import Request
 
 from googleapiclient.discovery import build
 
 import openai
 import os
+import pickle
+
 app = Flask(__name__,template_folder='templates')
 
 """
 # Set up YouTube API client
-scopes = ["https://www.googleapis.com/auth/youtube.force-ssl"]
-flow = Flow.from_client_secrets_file("client_secret_392257685147-6iv2tq0hirvsaugnmlncqct79is4jd64.apps.googleusercontent.com.json", scopes=scopes)
+scopes = ["https://www.googleapis.com/auth/youtube.force-ssl","https://www.googleapis.com/auth/youtube.readonly"]
+flow = Flow.from_client_secrets_file("client_secret_4.json", scopes=scopes)
 api_service_name = "youtube"
 api_version = "v3"
 
@@ -68,42 +70,64 @@ if __name__ == "__main__":
 """
 
 def authenticate_youtube():
-    flow = InstalledAppFlow.from_client_secrets_file(
-        'client_secret_392257685147-6iv2tq0hirvsaugnmlncqct79is4jd64.apps.googleusercontent.com.json',
-        scopes=['https://www.googleapis.com/auth/youtube.readonly',"https://www.googleapis.com/auth/youtube.force-ssl"]
-    )
-    flow.redirect_uri = 'http://localhost:8080'
 
-    credentials = flow.run_console()
+    credentials = None
 
-    return credentials.to_json()
+    # token.pickle stores the user's credentials from previously successful logins
+    if os.path.exists('token.pickle'):
+        print('Loading Credentials From File...')
+        with open('token.pickle', 'rb') as token:
+            credentials = pickle.load(token)
+    
+    # If there are no valid credentials available, then either refresh the token or log in.
+    if not credentials or not credentials.valid:
+        if credentials and credentials.expired and credentials.refresh_token:
+            print('Refreshing Access Token...')
+            credentials.refresh(Request())
+        else:
+            print('Fetching New Tokens...')
+            flow = InstalledAppFlow.from_client_secrets_file(
+            'client_secrets.json',
+            scopes=[
+                'https://www.googleapis.com/auth/youtube.readonly'
+            ]
+        )
+
+        flow.run_local_server(port=8080, prompt='consent',
+                              authorization_prompt_message='')
+        credentials = flow.credentials
+
+        # Save the credentials for the next run
+        with open('token.pickle', 'wb') as f:
+            print('Saving Credentials for Future Use...')
+            pickle.dump(credentials, f)
+
+ 
+    return credentials
 
 def get_liked_videos():
-    credentials_json = authenticate_youtube()
-    credentials = Credentials.from_json(credentials_json)
+    credentials = authenticate_youtube()
 
     youtube = build('youtube', 'v3', credentials=credentials)
 
-    response = youtube.videos().list(
-        part='snippet',
-        myRating='like'
+    results = youtube.videos().list(
+        part="snippet,contentDetails,statistics",
+        myRating='like', maxResults=25
     ).execute()
 
-    videos = response.get('items', [])
-
-    return videos
+    return results
 
 
 def get_recommendations(tags):
     openai.api_key = os.getenv("OPENAI_API_KEY")
 
-    model_engine = "text-davinci-002"
+    model_engine = "text-davinci-003"
     prompt = f"Recommend me a TV show, movie, or podcast based on the following tags: {tags}"
 
     response = openai.Completion.create(
         engine=model_engine,
         prompt=prompt,
-        max_tokens=50,
+        max_tokens=100,
         n=1,
         stop=None,
         temperature=0.5,
@@ -113,16 +137,24 @@ def get_recommendations(tags):
 
 @app.route('/youtube_tags')
 def youtube_tags():
-    videos = get_liked_videos()
+    results = get_liked_videos()
 
-    tags = []
-    for video in videos:
-        tags += video['snippet']['tags']
+    videos_list = []
 
+    video_tags = []
+
+    for item in results["items"]:
+        item_snippet = item["snippet"]
+        if 'tags' in item["snippet"].keys():
+            for t in item["snippet"]["tags"]:
+                if t not in video_tags:
+                    video_tags.append(t)
+
+ 
     # recommendations = get_recommendations(tags)
 
     # return jsonify(recommendations)
-    return jsonify(tags)
+    return jsonify(video_tags)
 
 if __name__ == '__main__':
     app.run()
