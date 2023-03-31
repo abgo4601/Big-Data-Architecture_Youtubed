@@ -65,12 +65,12 @@ def get_recommendations(tags):
     openai.api_key = os.getenv("OPENAI_API_KEY")
 
     model_engine = "text-davinci-003"
-    prompt = f"Recommend me top 5 TV shows, movies, podcasts based on the following tags: {tags}"
+    prompt = f"Recommend me top 15 TV shows, movies, podcasts along with their countries based on the following tags: {tags}"
 
     response = openai.Completion.create(
         engine=model_engine,
         prompt=prompt,
-        max_tokens=256,
+        max_tokens=1024,
         n=1,
         stop=None,
         temperature=0.8,
