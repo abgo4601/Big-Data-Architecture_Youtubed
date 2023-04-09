@@ -15,7 +15,7 @@ function App() {
     const movies = [
         {
         "name" : "The Godfather",
-        "genre": "Action, Thriller",
+        "genre": "Action",
           "img" : "https://media.npr.org/assets/img/2022/03/10/marlon-brandon-the-godfather_custom-e18469fdceae838fc9057f1f9ab1ddb019a66670-s1100-c50.jpg",
           "duration" : "126",
           "summary" : "Widely regarded as one of the greatest films of all time, this mob drama, based on Mario Puzo's novel of the same name, focuses on the powerful Italian-American crime family of Don Vito Corleone (Marlon Brando). ",
