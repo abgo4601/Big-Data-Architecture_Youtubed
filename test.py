@@ -1,11 +1,10 @@
 import os
-
 import google_auth_oauthlib.flow
 import googleapiclient.discovery
 import googleapiclient.errors
 from dotenv import load_dotenv
 import openai
-from datetime import datetime,timedelta
+from datetime import datetime
 from themoviedb import TMDb
 import requests
 
@@ -156,9 +155,9 @@ def get_details():
             elif category == 'Songs':
                 songs.append(line.strip().split('. ')[1].split(' - ')[0].split(' (')[0])
 
-    # song_details=fetch_song_details(songs)
-    # movie_details=fetch_movie_details(movies)
-    # show_details=fetch_show_details(shows)
-    return shows
+    song_details=fetch_song_details(songs)
+    movie_details=fetch_movie_details(movies)
+    show_details=fetch_show_details(shows)
+    return song_details,movie_details,show_details
 
 print(get_details())
