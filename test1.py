@@ -1,78 +1,90 @@
-text="""
-TV Shows:
-1. Game of Thrones
-2. Breaking Bad
-3. Friends
-4. The Big Bang Theory
-5. Stranger Things
-6. The Walking Dead
-7. The Simpsons
-8. Sherlock
-9. Peaky Blinders
-10. The Crown
-11. The Office
-12. Black Mirror
-13. Narcos
-14. The Haunting of Hill House
-15. Westworld
+from themoviedb import TMDb
+from dotenv import load_dotenv
+import os
+import requests
 
-Movies:
-1. The Godfather
-2. The Shawshank Redemption
-3. The Lord of the Rings: The Return of the King
-4. The Dark Knight
-5. Inception
-6. Pulp Fiction
-7. Fight Club
-8. Forrest Gump
-9. The Matrix
-10. Goodfellas
-11. Seven Samurai
-12. Schindler's List
-13. Jurassic Park
-14. The Silence of the Lambs
-15. Star Wars: The Empire Strikes Back
+load_dotenv()
 
-Songs:
-1. "Funky Tech House Mix 2019" - Nala Sinephro
-2. "Space 1.8" - Nala Sinephro
-3. "Space 3" - Nala Sinephro
-4. "Comfortably Numb" - Pink Floyd
-5. "Squeezehouse" - The Wall
-6. "Guitar Hero" - Maximillion
-7. "Shred" - Ripping Solo
-8. "Us and Them" - Pink Floyd
-9. "Brain Damage" - Pink Floyd
-10. "Money" - Pink Floyd
-11. "Time" - Pink Floyd
-12. "Wish You Were Here" - Pink Floyd
-13. "Learning to Fly" - Pink Floyd
-14. "Hey You" - Pink Floyd
-15. "Run Like Hell" - Pink Floyd
-"""
+tmdbkey=os.getenv("TMDB_KEY")
+spotify_id=os.getenv("SPOTIFY_CLIENT_ID")
+spotify_secret=os.getenv("SPOTIFY_CLIENT_SECRET")
 
-sections=text.split("\n\n")
+tmdb = TMDb(key=tmdbkey, language="en-US")
+    
+def fetch_song_details(collection):
+    out=[]
+    AUTH_URL = "https://accounts.spotify.com/api/token"
 
-sections=[section.strip() for section in sections]
+    auth_response = requests.post(AUTH_URL, {
+        'grant_type': 'client_credentials',
+        'client_id': spotify_id,
+        'client_secret': spotify_secret,
+    })
 
-shows=[]
-movies=[]
-songs=[]
+    access_token = auth_response.json()['access_token']
+    headers = {
+        'Authorization': f'Bearer {access_token}',
+        'Content-Type': 'application/json',
+    }
 
-for section in sections:
-    lines = section.split('\n')
-    category = lines.pop(0).replace(':', '')
-    for line in lines:
-        if category == 'TV Shows':
-            shows.append(line.strip().split('. ')[1])
-        elif category == 'Movies':
-            movies.append(line.strip().split('. ')[1])
-        elif category == 'Songs':
-            songs.append(line.strip().split('. ')[1])
+    QUERY_URL = "https://api.spotify.com/v1/search"
 
-print('TV Shows:', shows)
-print('Movies:', movies)
-print('Songs:', songs)
+    for song in collection:
+        query_params = {
+            'q': song,
+            'type': 'track',
+            'limit': 1,
+        }
+        response = requests.get(QUERY_URL, headers=headers, params=query_params)
+        json_response = response.json()
+        if(json_response['tracks']['items']):
+            out.append({
+                "title": json_response['tracks']['items'][0]['name'],
+                "artist": json_response['tracks']['items'][0]['artists'][0]['name'],
+                "album": json_response['tracks']['items'][0]['album']['name'],
+                "releaseDate": json_response['tracks']['items'][0]['album']['release_date'],
+                "popularity": json_response['tracks']['items'][0]['popularity'],
+                "image": json_response['tracks']['items'][0]['album']['images'][1]['url'],
+                "previewUrl": json_response['tracks']['items'][0]['preview_url'],
+                "externalUrl": json_response['tracks']['items'][0]['external_urls']['spotify']
+            })
+    return out
 
+def fetch_movie_details(collection):
+    out=[]
+    for movie in collection:
+        results=tmdb.search().movies(movie).results
+        if len(results)>0:
+            top_result=results[0]
+            out.append({
+                "title": top_result.original_title,
+                "summary": top_result.overview,
+                "release_date": top_result.release_date,
+                "popularity": top_result.popularity,
+                "voteAverage": top_result.vote_average,
+                "voteCount": top_result.vote_count,
+                "image": f"https://image.tmdb.org/t/p/original{top_result.poster_path}"
+            })
+    return out
 
+def fetch_show_details(collection):
+    out=[]
+    for show in collection:
+        results=tmdb.search().tv(show).results
+        if len(results)>0:
+            top_result=results[0]
+            out.append({
+                    "title": top_result.name,
+                    "summary": top_result.overview,
+                    "release_date": top_result.first_air_date,
+                    "popularity": top_result.popularity,
+                    "voteAverage": top_result.vote_average,
+                    "voteCount": top_result.vote_count,
+                    "image": f"https://image.tmdb.org/t/p/original{top_result.poster_path}"
+                })
+    return out
 
+print(fetch_movie_details(movies))
+print(fetch_show_details(shows))
+print(fetch_song_details(songs))
+        
