@@ -1,10 +1,12 @@
 import "./App.css";
 import Header from "./components/Header/Header";
 import List from "./components/List/List";
-import { BrowserRouter as Router, Route } from "react-router-dom";
-import Button from "react-bootstrap/Button";
-import Form from "react-bootstrap/Form";
-import Card from "react-bootstrap/Card";
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
+import 'bootstrap/dist/css/bootstrap.min.css';
+import Button from 'react-bootstrap/Button';
+import Form from 'react-bootstrap/Form';
+import Card from 'react-bootstrap/Card';
+import DetailedScreen from './components/DetailedScreen/DetailedScreen';
 
 function App() {
   const arr = [
@@ -28,16 +30,17 @@ function App() {
     },
   ];
 
-  return (
-    <div>
-      <Header />
-      <div className='body'>
-        {/* {arr.map((a, i) => <List type={a.type} list={a.list}/>)}  */}
-
-        <List movies={movies} name='Movies' />
-      </div>
+    return (<div>
+         <Router>
+        <Header/>
+        <Routes>
+        <Route path='/' element={<List  movies= {movies} name = "Movies"/>}  />
+        <Route path='/home' element={<List  movies= {movies} name = "Movies"/>} exact />
+        <Route path='/details' element={<DetailedScreen movies= {movies} />} exact />
+        </Routes>
+        </Router>
     </div>
-  );
+    );
 }
 
 export default App;
