@@ -1,7 +1,5 @@
 from flask import Flask, jsonify,redirect,url_for,render_template,request
 from themoviedb import TMDb
-
-from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 
@@ -13,7 +11,9 @@ import os
 import pickle
 
 app = Flask(__name__,template_folder='templates')
+from dotenv import load_dotenv
 
+load_dotenv()
 tmdbkey=os.getenv("TMDB_KEY")
 spotify_id=os.getenv("SPOTIFY_CLIENT_ID")
 spotify_secret=os.getenv("SPOTIFY_CLIENT_SECRET")
@@ -43,18 +43,20 @@ def authenticate_youtube():
             scopes=[
                 'https://www.googleapis.com/auth/youtube.readonly'
             ]
-        )
+            )
 
-        flow.run_local_server(port=8080, prompt='consent',
-                              authorization_prompt_message='')
-        credentials = flow.credentials
+            print(flow)
 
-        # Save the credentials for the next run
-        with open('token.pickle', 'wb') as f:
-            print('Saving Credentials for Future Use...')
-            pickle.dump(credentials, f)
+            flow.run_local_server(port=8080, prompt='consent',
+                                authorization_prompt_message='')
+            print(f" Got flow credentials: {flow.credentials}")
+            credentials = flow.credentials
 
-    print(credentials)
+            # Save the credentials for the next run
+            with open('token.pickle', 'wb') as f:
+                print('Saving Credentials for Future Use...')
+                pickle.dump(credentials, f)
+
     return credentials
 
 def get_liked_videos():
@@ -87,10 +89,9 @@ def get_recommendations(tags):
 
     return response.choices[0].text
 
-@app.route('/youtube_tags')
+@app.route('/recommendations')
 def youtube_tags():
     results = get_liked_videos()
-    print(results)
 
     video_tags = []
 
@@ -102,6 +103,7 @@ def youtube_tags():
                     video_tags.append(t)
  
     recommendations = get_recommendations(video_tags)
+    # print(recommendations)
     return parse_recommendations(recommendations)
 
 def fetch_song_details(collection):
@@ -182,23 +184,39 @@ def parse_recommendations(recommendations):
     movies=[]
     songs=[]
 
-    for section in recommendations:
-        lines = section.split('\n')
-        category = lines.pop(0).replace(':', '')
-        for line in lines:
-            if category == 'TV Shows':
-                shows.append(line.strip().split('. ')[1].split(' (')[0])
-            elif category == 'Movies':
-                movies.append(line.strip().split('. ')[1].split(' (')[0])
-            elif category == 'Songs':
-                songs.append(line.strip().split('. ')[1].split(' - ')[0].split(' (')[0])
+    # Split the text response into separate sections for each category
+    sections = recommendations.split("\n\n")
 
+    for section in sections:
+        if "TV Shows:" in section:
+            for line in section.split("\n")[1:]:
+                if line:
+                    shows.append(line.split(". ")[1])
+        elif "Movies:" in section:
+            for line in section.split("\n")[1:]:
+                if line:
+                    movies.append(line.split(". ")[1])
+        elif "Songs:" in section:
+            for line in section.split("\n")[1:]:
+                if line:
+                    print(line)
+                    songs.append(line.split(". ")[1])
+
+    # uncomment for debugging purpose for testing response
+    print('TV Shows:', shows)
+    print('Movies:', movies)
+    print('Songs:', songs)
+    
     song_details=fetch_song_details(songs)
     movie_details=fetch_movie_details(movies)
     show_details=fetch_show_details(shows)
 
-    return {song_details,movie_details,show_details}
+    # print(f" Song Details:{song_details}")
+    # print(f" Movie Details:{movie_details}")
+    # print(f" Show Details:{show_details}")
+
+    return jsonify(song_details,movie_details,show_details)
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)
