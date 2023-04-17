@@ -1,0 +1,8 @@
+.row {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.cards {
+    width: 15rem;
+}

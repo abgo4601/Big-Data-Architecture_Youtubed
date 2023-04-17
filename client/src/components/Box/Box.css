@@ -1,0 +1,22 @@
+.box {
+    cursor: pointer;
+    width: 18rem;
+    height: 32rem;
+    margin: 1rem;
+}
+
+.box:hover {
+    opacity: 0.7;
+}
+
+.box--image {
+    width: inherit;
+    height: inherit;
+}
+
+.box--data {
+    width: inherit;
+    height: inherit;
+    display: flex;
+    justify-content: center;
+}

@@ -9,10 +9,246 @@ import Modal from 'react-bootstrap/Modal';
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';
 import DetailedScreen from '../DetailedScreen/DetailedScreen';
+import './List.css';
+import Box from "../Box/Box";
 
 function List(props) {
     console.log(props);
     console.log(props.movies[0]);
+
+    const arr = {
+        "image": "https://image.tmdb.org/t/p/original/7fn624j5lj3xTme2SgiLCeuedmO.jpg",
+        "popularity": 73.931,
+        "release_date": "Thu, 16 Jan 2014 00:00:00 GMT",
+        "summary": "Under the direction of a ruthless instructor, a talented young drummer begins to pursue perfection at any cost, even his humanity.",
+        "title": "Whiplash",
+        "voteAverage": 8.377,
+        "voteCount": 13339
+    }
+    const dummyArr = {
+        movies: [{
+            "image": "https://image.tmdb.org/t/p/original/7fn624j5lj3xTme2SgiLCeuedmO.jpg",
+            "popularity": 73.931,
+            "release_date": "Thu, 16 Jan 2014 00:00:00 GMT",
+            "summary": "Under the direction of a ruthless instructor, a talented young drummer begins to pursue perfection at any cost, even his humanity.",
+            "title": "Whiplash",
+            "voteAverage": 8.377,
+            "voteCount": 13339
+        }, {
+            "image": "https://image.tmdb.org/t/p/original/7fn624j5lj3xTme2SgiLCeuedmO.jpg",
+            "popularity": 73.931,
+            "release_date": "Thu, 16 Jan 2014 00:00:00 GMT",
+            "summary": "Under the direction of a ruthless instructor, a talented young drummer begins to pursue perfection at any cost, even his humanity.",
+            "title": "Whiplash",
+            "voteAverage": 8.377,
+            "voteCount": 13339
+        }, {
+            "image": "https://image.tmdb.org/t/p/original/7fn624j5lj3xTme2SgiLCeuedmO.jpg",
+            "popularity": 73.931,
+            "release_date": "Thu, 16 Jan 2014 00:00:00 GMT",
+            "summary": "Under the direction of a ruthless instructor, a talented young drummer begins to pursue perfection at any cost, even his humanity.",
+            "title": "Whiplash",
+            "voteAverage": 8.377,
+            "voteCount": 13339
+        }, {
+            "image": "https://image.tmdb.org/t/p/original/7fn624j5lj3xTme2SgiLCeuedmO.jpg",
+            "popularity": 73.931,
+            "release_date": "Thu, 16 Jan 2014 00:00:00 GMT",
+            "summary": "Under the direction of a ruthless instructor, a talented young drummer begins to pursue perfection at any cost, even his humanity.",
+            "title": "Whiplash",
+            "voteAverage": 8.377,
+            "voteCount": 13339
+        }, {
+            "image": "https://image.tmdb.org/t/p/original/7fn624j5lj3xTme2SgiLCeuedmO.jpg",
+            "popularity": 73.931,
+            "release_date": "Thu, 16 Jan 2014 00:00:00 GMT",
+            "summary": "Under the direction of a ruthless instructor, a talented young drummer begins to pursue perfection at any cost, even his humanity.",
+            "title": "Whiplash",
+            "voteAverage": 8.377,
+            "voteCount": 13339
+        }, {
+            "image": "https://image.tmdb.org/t/p/original/7fn624j5lj3xTme2SgiLCeuedmO.jpg",
+            "popularity": 73.931,
+            "release_date": "Thu, 16 Jan 2014 00:00:00 GMT",
+            "summary": "Under the direction of a ruthless instructor, a talented young drummer begins to pursue perfection at any cost, even his humanity.",
+            "title": "Whiplash",
+            "voteAverage": 8.377,
+            "voteCount": 13339
+        }, {
+            "image": "https://image.tmdb.org/t/p/original/7fn624j5lj3xTme2SgiLCeuedmO.jpg",
+            "popularity": 73.931,
+            "release_date": "Thu, 16 Jan 2014 00:00:00 GMT",
+            "summary": "Under the direction of a ruthless instructor, a talented young drummer begins to pursue perfection at any cost, even his humanity.",
+            "title": "Whiplash",
+            "voteAverage": 8.377,
+            "voteCount": 13339
+        }, {
+            "image": "https://image.tmdb.org/t/p/original/7fn624j5lj3xTme2SgiLCeuedmO.jpg",
+            "popularity": 73.931,
+            "release_date": "Thu, 16 Jan 2014 00:00:00 GMT",
+            "summary": "Under the direction of a ruthless instructor, a talented young drummer begins to pursue perfection at any cost, even his humanity.",
+            "title": "Whiplash",
+            "voteAverage": 8.377,
+            "voteCount": 13339
+        },],
+        tvShows: [
+            {
+                "image": "https://image.tmdb.org/t/p/original/dXQCEjVth8P8L47XIsoRt0oL8Gw.jpg",
+                "popularity": 11.217,
+                "release_date": "Fri, 20 Mar 2020 00:00:00 GMT",
+                "summary": "A zoo owner spirals out of control amid a cast of eccentric characters in this true murder-for-hire story from the underworld of big cat breeding.",
+                "title": "Tiger King",
+                "voteAverage": 6.925,
+                "voteCount": 339
+            }, {
+                "image": "https://image.tmdb.org/t/p/original/dXQCEjVth8P8L47XIsoRt0oL8Gw.jpg",
+                "popularity": 11.217,
+                "release_date": "Fri, 20 Mar 2020 00:00:00 GMT",
+                "summary": "A zoo owner spirals out of control amid a cast of eccentric characters in this true murder-for-hire story from the underworld of big cat breeding.",
+                "title": "Tiger King",
+                "voteAverage": 6.925,
+                "voteCount": 339
+            }, {
+                "image": "https://image.tmdb.org/t/p/original/dXQCEjVth8P8L47XIsoRt0oL8Gw.jpg",
+                "popularity": 11.217,
+                "release_date": "Fri, 20 Mar 2020 00:00:00 GMT",
+                "summary": "A zoo owner spirals out of control amid a cast of eccentric characters in this true murder-for-hire story from the underworld of big cat breeding.",
+                "title": "Tiger King",
+                "voteAverage": 6.925,
+                "voteCount": 339
+            }, {
+                "image": "https://image.tmdb.org/t/p/original/dXQCEjVth8P8L47XIsoRt0oL8Gw.jpg",
+                "popularity": 11.217,
+                "release_date": "Fri, 20 Mar 2020 00:00:00 GMT",
+                "summary": "A zoo owner spirals out of control amid a cast of eccentric characters in this true murder-for-hire story from the underworld of big cat breeding.",
+                "title": "Tiger King",
+                "voteAverage": 6.925,
+                "voteCount": 339
+            }, {
+                "image": "https://image.tmdb.org/t/p/original/dXQCEjVth8P8L47XIsoRt0oL8Gw.jpg",
+                "popularity": 11.217,
+                "release_date": "Fri, 20 Mar 2020 00:00:00 GMT",
+                "summary": "A zoo owner spirals out of control amid a cast of eccentric characters in this true murder-for-hire story from the underworld of big cat breeding.",
+                "title": "Tiger King",
+                "voteAverage": 6.925,
+                "voteCount": 339
+            }, {
+                "image": "https://image.tmdb.org/t/p/original/dXQCEjVth8P8L47XIsoRt0oL8Gw.jpg",
+                "popularity": 11.217,
+                "release_date": "Fri, 20 Mar 2020 00:00:00 GMT",
+                "summary": "A zoo owner spirals out of control amid a cast of eccentric characters in this true murder-for-hire story from the underworld of big cat breeding.",
+                "title": "Tiger King",
+                "voteAverage": 6.925,
+                "voteCount": 339
+            }, {
+                "image": "https://image.tmdb.org/t/p/original/dXQCEjVth8P8L47XIsoRt0oL8Gw.jpg",
+                "popularity": 11.217,
+                "release_date": "Fri, 20 Mar 2020 00:00:00 GMT",
+                "summary": "A zoo owner spirals out of control amid a cast of eccentric characters in this true murder-for-hire story from the underworld of big cat breeding.",
+                "title": "Tiger King",
+                "voteAverage": 6.925,
+                "voteCount": 339
+            }, {
+                "image": "https://image.tmdb.org/t/p/original/dXQCEjVth8P8L47XIsoRt0oL8Gw.jpg",
+                "popularity": 11.217,
+                "release_date": "Fri, 20 Mar 2020 00:00:00 GMT",
+                "summary": "A zoo owner spirals out of control amid a cast of eccentric characters in this true murder-for-hire story from the underworld of big cat breeding.",
+                "title": "Tiger King",
+                "voteAverage": 6.925,
+                "voteCount": 339
+            }, {
+                "image": "https://image.tmdb.org/t/p/original/dXQCEjVth8P8L47XIsoRt0oL8Gw.jpg",
+                "popularity": 11.217,
+                "release_date": "Fri, 20 Mar 2020 00:00:00 GMT",
+                "summary": "A zoo owner spirals out of control amid a cast of eccentric characters in this true murder-for-hire story from the underworld of big cat breeding.",
+                "title": "Tiger King",
+                "voteAverage": 6.925,
+                "voteCount": 339
+            },
+        ],
+        songs: [{
+            "album": "Smells Like Teen Spirit (Arr. for Harp by Alexander Boldachev)",
+            "artist": "Kurt Cobain",
+            "externalUrl": "https://open.spotify.com/track/020QUTHjPxJ05XXaJbWEVv",
+            "image": "https://i.scdn.co/image/ab67616d00001e022a3e8c8a6e4a34d361178718",
+            "popularity": 24,
+            "previewUrl": "https://p.scdn.co/mp3-preview/e9d88225b250703eaa941b72e91a8acc989137f1?cid=580c268cc1c142abb5e4697ca23b19a4",
+            "releaseDate": "2023-04-07",
+            "title": "Smells Like Teen Spirit - Arr. for Harp by Alexander Boldachev"
+        }, {
+            "album": "Smells Like Teen Spirit (Arr. for Harp by Alexander Boldachev)",
+            "artist": "Kurt Cobain",
+            "externalUrl": "https://open.spotify.com/track/020QUTHjPxJ05XXaJbWEVv",
+            "image": "https://i.scdn.co/image/ab67616d00001e022a3e8c8a6e4a34d361178718",
+            "popularity": 24,
+            "previewUrl": "https://p.scdn.co/mp3-preview/e9d88225b250703eaa941b72e91a8acc989137f1?cid=580c268cc1c142abb5e4697ca23b19a4",
+            "releaseDate": "2023-04-07",
+            "title": "Smells Like Teen Spirit - Arr. for Harp by Alexander Boldachev"
+        }, {
+            "album": "Smells Like Teen Spirit (Arr. for Harp by Alexander Boldachev)",
+            "artist": "Kurt Cobain",
+            "externalUrl": "https://open.spotify.com/track/020QUTHjPxJ05XXaJbWEVv",
+            "image": "https://i.scdn.co/image/ab67616d00001e022a3e8c8a6e4a34d361178718",
+            "popularity": 24,
+            "previewUrl": "https://p.scdn.co/mp3-preview/e9d88225b250703eaa941b72e91a8acc989137f1?cid=580c268cc1c142abb5e4697ca23b19a4",
+            "releaseDate": "2023-04-07",
+            "title": "Smells Like Teen Spirit - Arr. for Harp by Alexander Boldachev"
+        }, {
+            "album": "Smells Like Teen Spirit (Arr. for Harp by Alexander Boldachev)",
+            "artist": "Kurt Cobain",
+            "externalUrl": "https://open.spotify.com/track/020QUTHjPxJ05XXaJbWEVv",
+            "image": "https://i.scdn.co/image/ab67616d00001e022a3e8c8a6e4a34d361178718",
+            "popularity": 24,
+            "previewUrl": "https://p.scdn.co/mp3-preview/e9d88225b250703eaa941b72e91a8acc989137f1?cid=580c268cc1c142abb5e4697ca23b19a4",
+            "releaseDate": "2023-04-07",
+            "title": "Smells Like Teen Spirit - Arr. for Harp by Alexander Boldachev"
+        }, {
+            "album": "Smells Like Teen Spirit (Arr. for Harp by Alexander Boldachev)",
+            "artist": "Kurt Cobain",
+            "externalUrl": "https://open.spotify.com/track/020QUTHjPxJ05XXaJbWEVv",
+            "image": "https://i.scdn.co/image/ab67616d00001e022a3e8c8a6e4a34d361178718",
+            "popularity": 24,
+            "previewUrl": "https://p.scdn.co/mp3-preview/e9d88225b250703eaa941b72e91a8acc989137f1?cid=580c268cc1c142abb5e4697ca23b19a4",
+            "releaseDate": "2023-04-07",
+            "title": "Smells Like Teen Spirit - Arr. for Harp by Alexander Boldachev"
+        }, {
+            "album": "Smells Like Teen Spirit (Arr. for Harp by Alexander Boldachev)",
+            "artist": "Kurt Cobain",
+            "externalUrl": "https://open.spotify.com/track/020QUTHjPxJ05XXaJbWEVv",
+            "image": "https://i.scdn.co/image/ab67616d00001e022a3e8c8a6e4a34d361178718",
+            "popularity": 24,
+            "previewUrl": "https://p.scdn.co/mp3-preview/e9d88225b250703eaa941b72e91a8acc989137f1?cid=580c268cc1c142abb5e4697ca23b19a4",
+            "releaseDate": "2023-04-07",
+            "title": "Smells Like Teen Spirit - Arr. for Harp by Alexander Boldachev"
+        }, {
+            "album": "Smells Like Teen Spirit (Arr. for Harp by Alexander Boldachev)",
+            "artist": "Kurt Cobain",
+            "externalUrl": "https://open.spotify.com/track/020QUTHjPxJ05XXaJbWEVv",
+            "image": "https://i.scdn.co/image/ab67616d00001e022a3e8c8a6e4a34d361178718",
+            "popularity": 24,
+            "previewUrl": "https://p.scdn.co/mp3-preview/e9d88225b250703eaa941b72e91a8acc989137f1?cid=580c268cc1c142abb5e4697ca23b19a4",
+            "releaseDate": "2023-04-07",
+            "title": "Smells Like Teen Spirit - Arr. for Harp by Alexander Boldachev"
+        }, {
+            "album": "Smells Like Teen Spirit (Arr. for Harp by Alexander Boldachev)",
+            "artist": "Kurt Cobain",
+            "externalUrl": "https://open.spotify.com/track/020QUTHjPxJ05XXaJbWEVv",
+            "image": "https://i.scdn.co/image/ab67616d00001e022a3e8c8a6e4a34d361178718",
+            "popularity": 24,
+            "previewUrl": "https://p.scdn.co/mp3-preview/e9d88225b250703eaa941b72e91a8acc989137f1?cid=580c268cc1c142abb5e4697ca23b19a4",
+            "releaseDate": "2023-04-07",
+            "title": "Smells Like Teen Spirit - Arr. for Harp by Alexander Boldachev"
+        }, {
+            "album": "Smells Like Teen Spirit (Arr. for Harp by Alexander Boldachev)",
+            "artist": "Kurt Cobain",
+            "externalUrl": "https://open.spotify.com/track/020QUTHjPxJ05XXaJbWEVv",
+            "image": "https://i.scdn.co/image/ab67616d00001e022a3e8c8a6e4a34d361178718",
+            "popularity": 24,
+            "previewUrl": "https://p.scdn.co/mp3-preview/e9d88225b250703eaa941b72e91a8acc989137f1?cid=580c268cc1c142abb5e4697ca23b19a4",
+            "releaseDate": "2023-04-07",
+            "title": "Smells Like Teen Spirit - Arr. for Harp by Alexander Boldachev"
+        },]
+    }
 
     const [show, setShow] = useState(false);
     const [modalSummary, setModalSummary] = useState('');
@@ -20,101 +256,63 @@ function List(props) {
 
     const renderTooltip = (props) => (
         <Tooltip id="button-tooltip" {...props}>
-          Detailed suggestions and analytics
+            Detailed suggestions and analytics
         </Tooltip>
-      );
+    );
 
     function handleClose() {
         setShow(false);
-      }
+    }
 
-      function handleShow(summary) { 
+    function handleShow(summary) {
         console.log(summary);
-         
+
         setModalSummary(summary);
         setShow(true);
-      }
+    }
+
     const currentMovies = props.movies;
-    //console.log(arr[0].name);
     return (
-        // <div>
-        //     <h3>{props.type}</h3>
-        //     <h3>{props.img}</h3>
-        //     {props.list.map((li, i) => {
-        //         return <div key={i}>{li}</div>
-        //     })}
-        // </div>
 
         <div>
-       
- <Container >
- <h3>{props.type}</h3>
- <h1>{props.name}</h1>
-    <Row xs={1} md={4} className="g-4">
-           
-      {Array.from({ length: 8 }).map((_, idx) => (
-        <Col>
-          <Card bg= "dark"
-          text='white'
-         
-          className="mb-2">
-          
-          <Card.Img onClick={() => handleShow(props.movies[0].summary)} style={{ width: 'auto', height : '200px'}} variant="top" src= {props.movies[0].img } />
-          <Card.Body>
-            {/* <Card.Title>{props.movies[0].name}</Card.Title> */}
-            <Card.Text>
-            {props.movies[0].name}
-             
-            </Card.Text>
-            <Row>
-                <Col>
-                <p1 style={{ color: 'red' }} >Genre :   </p1>
-                <p1>{props.movies[0].genre} </p1> 
-                </Col>
-                <Col>
-                <p1 style={{ color: 'red' }} > Ratings: </p1> 5/5
-                </Col>
-            </Row>
-            <Row>
-            <Col>
-            <p1 style={{ color: 'red' }} > Length: </p1> {props.movies[0].duration} mins
-            </Col>
-            <Col>
-            <p1 style={{ color: 'red' }}  onClick={() => handleShow(props.movies[0].summary)}>Summary</p1>
-            </Col>
-            </Row>
-            <hr></hr>
-            <OverlayTrigger
-      placement="right"
-      delay={{ show: 250, hide: 400 }}
-      overlay={renderTooltip}
-    >
-      <Button variant="danger">More Details</Button>
-    </OverlayTrigger>
-            {/* <Button variant="danger">More Details</Button> */}
-          </Card.Body>
-        </Card>
-      </Col>
-    ))}
-  </Row>
- 
-  </Container>
 
-  <Modal show={show} onHide={handleClose}>
-        <Modal.Header closeButton>
-          <Modal.Title>Summary</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>{modalSummary}</Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleClose}>
-            Close
-          </Button>
-        </Modal.Footer>
-      </Modal>
+            <Container>
+                <h3>{props.type}</h3>
+                <h1>{props.name}</h1>
+                <div className="row">
+                    {dummyArr.movies.map((movie, idx) => (
+                        <Box movie={movie} handleShow={handleShow} renderTooltip={renderTooltip} />
+                    ))}
+                </div>
+                <div className="row">
+                    {dummyArr.tvShows.map((movie, idx) => (
+                        <Box movie={movie} handleShow={handleShow} renderTooltip={renderTooltip} />
+                    ))}
+                </div>
+                <div className="row">
+                    {dummyArr.songs.map((movie, idx) => (
+                        <Box movie={movie} handleShow={handleShow} renderTooltip={renderTooltip} />
+                    ))}
+                </div>
 
- 
+            </Container>
+
+            <Modal show={show} onHide={handleClose}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Summary</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>{modalSummary}</Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleClose}>
+                        Close
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+
+
         </div>
 
     );
 }
+
 export default List;

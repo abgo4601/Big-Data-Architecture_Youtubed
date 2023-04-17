@@ -1,0 +1,16 @@
+.detailed-screen {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: calc(100vh - 6rem);
+}
+
+.detailed-screen--image {
+    width: 18rem;
+    height: 32rem;
+    margin-right: 2.5rem;
+}
+
+.detailed-screen--data {
+    width: 32rem;
+}
