@@ -3,6 +3,7 @@ import Col from 'react-bootstrap/Col';
 import Row from 'react-bootstrap/Row';
 import Container from 'react-bootstrap/Row';
 import Stack from 'react-bootstrap/Stack';
+import RecommendedSites from '../RecommendedSites/RecommendedSites';
 
 const DetailedScreen = (props) => {
     return (
@@ -34,7 +35,9 @@ const DetailedScreen = (props) => {
         <Row>
             <p>{props.movies[0].summary}</p>
         </Row>
-     
+        <Row>
+            <RecommendedSites name= {props.movies[0].name}/>
+        </Row>
     </Col>
 </Row>
 <Row>
