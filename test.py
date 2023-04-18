@@ -1,23 +1,69 @@
-import os
-import google_auth_oauthlib.flow
-import googleapiclient.discovery
-import googleapiclient.errors
-from dotenv import load_dotenv
-import openai
-from datetime import datetime
 from themoviedb import TMDb
 import requests
 
-load_dotenv()
+import openai
+import os
+import pickle
+from connect_db import connect_db,insert_into_db
+from dotenv import load_dotenv
 
-openai.api_key=os.getenv("OPEN_AI")
+res="""TV Shows:
+1. The Big Bang Theory
+2. Stranger Things
+3. Game of Thrones
+4. Rick and Morty
+5. Breaking Bad
+6. Friends
+7. The Walking Dead
+8. The Crown
+9. Westworld
+10. The Office
+11. Doctor Who
+12. Grey's Anatomy
+13. The Handmaid's Tale
+14. Black Mirror
+15. This Is Us
+
+Movies:
+1. The Shawshank Redemption
+2. The Dark Knight
+3. The Godfather
+4. Inception
+5. Schindler's List
+6. The Lord of the Rings
+7. Fight Club
+8. Forrest Gump
+9. The Matrix
+10. Star Wars
+11. Good Will Hunting
+12. Pulp Fiction
+13. The Silence of the Lambs
+14. The Green Mile
+15. Gladiator
+
+Songs:
+1. "Space 1.8" by Nala Sinephro
+2. "Wird Schon Irgendwie Gehn" by AnnenMayKantereit
+3. "Toms Diner" by Suzanne Vega
+4. "Chura Liya Hai Tumne Jo Dil Ko" by Mohammad Rafi
+5. "Sajaunga Lutkar Bhi Tere Badan Ki Daali Ko" by Asha Bhosle
+6. "Instant Karma" by John Lennon
+7. "Funky Tech House Mix 2019" by Groove
+8. "Comfortably Numb" by Pink Floyd
+9. "Guitar Hero" by Max Newman
+10. "The Wall" by Smiley Core
+11. "Shred" by Reuben Gingrich
+12. "David Gilmour Solo" by Bob Ezrin
+13. "James Guthrie Solo" by Michael Kamen
+14. "Moneypit" by CGPGrey
+15. "Escape" by Storror POV"""
+
+load_dotenv()
 tmdbkey=os.getenv("TMDB_KEY")
 spotify_id=os.getenv("SPOTIFY_CLIENT_ID")
 spotify_secret=os.getenv("SPOTIFY_CLIENT_SECRET")
 
 tmdb = TMDb(key=tmdbkey, language="en-US")
-
-scopes = ["https://www.googleapis.com/auth/youtube.readonly"]
 
 def fetch_song_details(collection):
     out=[]
@@ -67,7 +113,7 @@ def fetch_movie_details(collection):
             out.append({
                 "title": top_result.original_title,
                 "summary": top_result.overview,
-                "release_date": top_result.release_date,
+                "release_date": top_result.release_date.strftime('%Y-%m-%d'),
                 "popularity": top_result.popularity,
                 "voteAverage": top_result.vote_average,
                 "voteCount": top_result.vote_count,
@@ -84,7 +130,7 @@ def fetch_show_details(collection):
             out.append({
                     "title": top_result.name,
                     "summary": top_result.overview,
-                    "release_date": top_result.first_air_date,
+                    "release_date": top_result.first_air_date.strftime('%Y-%m-%d'),
                     "popularity": top_result.popularity,
                     "voteAverage": top_result.vote_average,
                     "voteCount": top_result.vote_count,
@@ -92,72 +138,38 @@ def fetch_show_details(collection):
                 })
     return out
 
-def get_details():
-    # Disable OAuthlib's HTTPS verification when running locally.
-    # *DO NOT* leave this option enabled in production.
-    os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
-
-    api_service_name = "youtube"
-    api_version = "v3"
-    client_secrets_file = 'client_secrets.json'
-
-    # Get credentials and create an API client
-    flow = google_auth_oauthlib.flow.InstalledAppFlow.from_client_secrets_file(
-        client_secrets_file, scopes)
-    credentials = flow.run_local_server()
-    youtube = googleapiclient.discovery.build(
-        api_service_name, api_version, credentials=credentials)
-
-    now=datetime.utcnow()
-
-    results = youtube.videos().list(
-        part="snippet,contentDetails,statistics",
-        myRating='like', maxResults=25
-    )
-
-    response = results.execute()
-
-    video_tags = []
-
-    for item in response["items"]:
-        if 'tags' in item["snippet"].keys():
-            for t in item["snippet"]["tags"]:
-                if t not in video_tags:
-                    video_tags.append(t)
-
-    model_engine = "text-davinci-003"
-    prompt = f"Recommend me names of top 15 TV shows, movies that are listed on IMDB and songs listed on Spotify based on the following tags: {video_tags}."
-
-    response = openai.Completion.create(
-        engine=model_engine,
-        prompt=prompt,
-        max_tokens=1024,
-        n=1,
-        stop=None,
-        temperature=0.8,
-    )
-
-    sections=response.choices[0].text.split("\n\n")
-    sections=[section.strip() for section in sections]
-
+def parse_recommendations(res):
     shows=[]
     movies=[]
     songs=[]
 
-    for section in sections:
-        lines = section.split('\n')
-        category = lines.pop(0).replace(':', '')
-        for line in lines:
-            if category == 'TV Shows':
-                shows.append(line.strip().split('. ')[1].split(' (')[0])
-            elif category == 'Movies':
-                movies.append(line.strip().split('. ')[1].split(' (')[0])
-            elif category == 'Songs':
-                songs.append(line.strip().split('. ')[1].split(' - ')[0].split(' (')[0])
+    # Split the text response into separate sections for each category
+    sections = res.split("\n\n")
 
+    for section in sections:
+        if "TV Shows:" in section:
+            for line in section.split("\n")[1:]:
+                if line:
+                    shows.append(line.split(". ")[1].split(" (")[0])
+        elif "Movies:" in section:
+            for line in section.split("\n")[1:]:
+                if line:
+                    movies.append(line.split(". ")[1].split(" (")[0])
+        elif "Songs:" in section:
+            for line in section.split("\n")[1:]:
+                if line:
+                    print(line)
+                    songs.append(line.split(". ")[1])
+
+    # uncomment for debugging purpose for testing response
+    # print('TV Shows:', shows)
+    # print('Movies:', movies)
+    # print('Songs:', songs)
+    
     song_details=fetch_song_details(songs)
     movie_details=fetch_movie_details(movies)
     show_details=fetch_show_details(shows)
-    return song_details,movie_details,show_details
 
-print(get_details())
+    return [song_details,movie_details,show_details]
+
+print(parse_recommendations(res))
