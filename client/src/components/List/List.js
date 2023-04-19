@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Card from 'react-bootstrap/Card';
 import Col from 'react-bootstrap/Col';
@@ -285,11 +285,13 @@ function List(props) {
                     ))}
                 </div>
                 <div className="row">
+                    <h3>Tv Shows</h3>
                     {dummyArr.tvShows.map((movie, idx) => (
                         <Box movie={movie} handleShow={handleShow} renderTooltip={renderTooltip} />
                     ))}
                 </div>
                 <div className="row">
+                    <h3>Songs</h3>
                     {dummyArr.songs.map((movie, idx) => (
                         <Box movie={movie} handleShow={handleShow} renderTooltip={renderTooltip} />
                     ))}
