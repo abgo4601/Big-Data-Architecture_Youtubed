@@ -20,10 +20,44 @@ spotify_secret=os.getenv("SPOTIFY_CLIENT_SECRET")
 
 tmdb = TMDb(key=tmdbkey, language="en-US")
 
+CLIENT_CONFIG = {'web': {
+    'client_id': os.getenv("GOOGLE_CLIENT_ID"),
+    'project_id': os.getenv("GOOGLE_PROJECT_ID"),
+    'auth_uri': 'https://accounts.google.com/o/oauth2/auth',
+    'token_uri': 'https://www.googleapis.com/oauth2/v3/token',
+    'auth_provider_x509_cert_url': 'https://www.googleapis.com/oauth2/v1/certs',
+    'client_secret': os.getenv("GOOGLE_CLIENT_SECRET"),
+    'redirect_uris': os.getenv("GOOGLE_REDIRECT_URIS"),
+    'javascript_origins': os.getenv("GOOGLE_JAVASCRIPT_ORIGINS")
+}}
 
-def authenticate_youtube():
+@app.route('/authenticate')
+def authenticate():
 
-    credentials = None
+    credentials = generate_credentials()
+
+    return credentials.to_json()
+
+def generate_credentials():
+
+    flow = InstalledAppFlow.from_client_config(
+        CLIENT_CONFIG,
+        scopes=[
+            'https://www.googleapis.com/auth/youtube.readonly'
+        ]
+        )
+
+    flow.run_local_server(port=8080, prompt='consent',
+                                authorization_prompt_message='')
+
+    # Save the credentials for the next run
+    with open('token.pickle', 'wb') as f:
+        print('Saving Credentials for Future Use...')
+        pickle.dump(flow.credentials, f)
+
+    return flow.credentials
+   
+def get_liked_videos():
 
     # token.pickle stores the user's credentials from previously successful logins
     if os.path.exists('token.pickle'):
@@ -31,36 +65,12 @@ def authenticate_youtube():
         with open('token.pickle', 'rb') as token:
             credentials = pickle.load(token)
     
-    # If there are no valid credentials available, then either refresh the token or log in.
     if not credentials or not credentials.valid:
         if credentials and credentials.expired and credentials.refresh_token:
             print('Refreshing Access Token...')
             credentials.refresh(Request())
         else:
-            print('Fetching New Tokens...')
-            flow = InstalledAppFlow.from_client_secrets_file(
-            'client_secrets.json',
-            scopes=[
-                'https://www.googleapis.com/auth/youtube.readonly'
-            ]
-            )
-
-            # print(flow)
-
-            flow.run_local_server(port=8080, prompt='consent',
-                                authorization_prompt_message='')
-            print(f" Got flow credentials: {flow.credentials}")
-            credentials = flow.credentials
-
-            # Save the credentials for the next run
-            with open('token.pickle', 'wb') as f:
-                print('Saving Credentials for Future Use...')
-                pickle.dump(credentials, f)
-
-    return credentials
-
-def get_liked_videos():
-    credentials = authenticate_youtube()
+            credentials = generate_credentials()
 
     youtube = build('youtube', 'v3', credentials=credentials)
 
@@ -200,7 +210,6 @@ def parse_recommendations(recommendations):
         elif "Songs:" in section:
             for line in section.split("\n")[1:]:
                 if line:
-                    print(line)
                     songs.append(line.split(". ")[1])
 
     # uncomment for debugging purpose for testing response
