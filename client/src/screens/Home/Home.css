@@ -1,0 +1,38 @@
+.TreadingHome {
+  padding: 0px 20px;
+}
+.TreadingHome h3 {
+  font-family: "Poppins", sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 5px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #abb7c4;
+}
+.btn__home {
+  padding-top: 10px;
+  width: 200px;
+  height: 40px;
+  font-family: "Roboto", sans-serif;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 500;
+  color: rgb(255, 255, 255);
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  outline: none;
+  margin-top: 10px;
+  box-shadow: 0px 15px 15px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease 0s;
+}
+.major {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn__home h6 {
+  color: #ffffff;
+  font-weight: 700;
+}

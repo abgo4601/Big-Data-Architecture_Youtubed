@@ -1,0 +1,46 @@
+.login__main {
+  background: rgb(37, 9, 73) !important;
+  height: 100vh;
+}
+.login__row {
+  display: flex !important;
+  justify-content: center;
+  margin: auto;
+  height: 100vh;
+  align-items: center !important;
+}
+
+.login__main .card {
+  height: 30% !important;
+  width: 350px !important;
+  outline: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: none;
+  justify-content: center;
+  padding-top: 20px;
+  font-family: "Roboto", sans-serif;
+}
+.login__title h2 {
+  text-align: center;
+  font-size: 1.6rem;
+  font-weight: 600;
+}
+.login__btns {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.login__btns button {
+  height: 45px;
+  width: 250px;
+  font-weight: 600;
+  margin: 10px 0;
+}
+.login__btns .google {
+  border: 2px solid gray;
+  font-family: "Roboto", sans-serif;
+  border-radius: 5px;
+  color: rgb(61, 61, 61);
+}
