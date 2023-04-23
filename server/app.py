@@ -45,7 +45,7 @@ def authenticate_youtube():
             ]
             )
 
-            print(flow)
+            # print(flow)
 
             flow.run_local_server(port=8080, prompt='consent',
                                 authorization_prompt_message='')
@@ -186,6 +186,7 @@ def parse_recommendations(recommendations):
 
     # Split the text response into separate sections for each category
     sections = recommendations.split("\n\n")
+    print(recommendations)
 
     for section in sections:
         if "TV Shows:" in section:
@@ -203,9 +204,9 @@ def parse_recommendations(recommendations):
                     songs.append(line.split(". ")[1])
 
     # uncomment for debugging purpose for testing response
-    print('TV Shows:', shows)
-    print('Movies:', movies)
-    print('Songs:', songs)
+    print('TV Shows 1:', shows)
+    print('Movies 2:', movies)
+    print('Songs 3:', songs)
     
     song_details=fetch_song_details(songs)
     movie_details=fetch_movie_details(movies)

@@ -63,7 +63,7 @@ typings/
 .yarn-integrity
 
 # dotenv environment variables file
-.env
+server/.env
 
 
 
@@ -150,7 +150,7 @@ celerybeat-schedule.*
 *.sage.py
 
 # Environments
-.env
+server/.env
 .venv
 .pickle
 env/

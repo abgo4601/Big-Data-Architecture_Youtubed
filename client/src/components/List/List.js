@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Card from 'react-bootstrap/Card';
 import Col from 'react-bootstrap/Col';
@@ -11,10 +11,27 @@ import Tooltip from 'react-bootstrap/Tooltip';
 import DetailedScreen from '../DetailedScreen/DetailedScreen';
 import './List.css';
 import Box from "../Box/Box";
+import axios from "axios";
 
 function List(props) {
     console.log(props);
     console.log(props.movies[0]);
+    const [list, setList] = useState({movies: [], tvShows: [], songs: []});
+
+    useEffect(() => {
+        const fetchAPI = async () => {
+            const response = await axios.get('http://localhost:5000/recommendations');
+            console.log('response', response);
+            setList({tvShows: response[0], movies: response[1], songs: response[2]})
+        }
+
+        fetchAPI();
+    }, []);
+
+    /**
+     * Sgin In Screem -> Splash Screen/Button click ->
+     * @type {{summary: string, image: string, voteAverage: number, release_date: string, popularity: number, voteCount: number, title: string}}
+     */
 
     const arr = {
         "image": "https://image.tmdb.org/t/p/original/7fn624j5lj3xTme2SgiLCeuedmO.jpg",
@@ -90,83 +107,79 @@ function List(props) {
             "title": "Whiplash",
             "voteAverage": 8.377,
             "voteCount": 13339
-        },],
-        tvShows: [
-            {
-                "image": "https://image.tmdb.org/t/p/original/dXQCEjVth8P8L47XIsoRt0oL8Gw.jpg",
-                "popularity": 11.217,
-                "release_date": "Fri, 20 Mar 2020 00:00:00 GMT",
-                "summary": "A zoo owner spirals out of control amid a cast of eccentric characters in this true murder-for-hire story from the underworld of big cat breeding.",
-                "title": "Tiger King",
-                "voteAverage": 6.925,
-                "voteCount": 339
-            }, {
-                "image": "https://image.tmdb.org/t/p/original/dXQCEjVth8P8L47XIsoRt0oL8Gw.jpg",
-                "popularity": 11.217,
-                "release_date": "Fri, 20 Mar 2020 00:00:00 GMT",
-                "summary": "A zoo owner spirals out of control amid a cast of eccentric characters in this true murder-for-hire story from the underworld of big cat breeding.",
-                "title": "Tiger King",
-                "voteAverage": 6.925,
-                "voteCount": 339
-            }, {
-                "image": "https://image.tmdb.org/t/p/original/dXQCEjVth8P8L47XIsoRt0oL8Gw.jpg",
-                "popularity": 11.217,
-                "release_date": "Fri, 20 Mar 2020 00:00:00 GMT",
-                "summary": "A zoo owner spirals out of control amid a cast of eccentric characters in this true murder-for-hire story from the underworld of big cat breeding.",
-                "title": "Tiger King",
-                "voteAverage": 6.925,
-                "voteCount": 339
-            }, {
-                "image": "https://image.tmdb.org/t/p/original/dXQCEjVth8P8L47XIsoRt0oL8Gw.jpg",
-                "popularity": 11.217,
-                "release_date": "Fri, 20 Mar 2020 00:00:00 GMT",
-                "summary": "A zoo owner spirals out of control amid a cast of eccentric characters in this true murder-for-hire story from the underworld of big cat breeding.",
-                "title": "Tiger King",
-                "voteAverage": 6.925,
-                "voteCount": 339
-            }, {
-                "image": "https://image.tmdb.org/t/p/original/dXQCEjVth8P8L47XIsoRt0oL8Gw.jpg",
-                "popularity": 11.217,
-                "release_date": "Fri, 20 Mar 2020 00:00:00 GMT",
-                "summary": "A zoo owner spirals out of control amid a cast of eccentric characters in this true murder-for-hire story from the underworld of big cat breeding.",
-                "title": "Tiger King",
-                "voteAverage": 6.925,
-                "voteCount": 339
-            }, {
-                "image": "https://image.tmdb.org/t/p/original/dXQCEjVth8P8L47XIsoRt0oL8Gw.jpg",
-                "popularity": 11.217,
-                "release_date": "Fri, 20 Mar 2020 00:00:00 GMT",
-                "summary": "A zoo owner spirals out of control amid a cast of eccentric characters in this true murder-for-hire story from the underworld of big cat breeding.",
-                "title": "Tiger King",
-                "voteAverage": 6.925,
-                "voteCount": 339
-            }, {
-                "image": "https://image.tmdb.org/t/p/original/dXQCEjVth8P8L47XIsoRt0oL8Gw.jpg",
-                "popularity": 11.217,
-                "release_date": "Fri, 20 Mar 2020 00:00:00 GMT",
-                "summary": "A zoo owner spirals out of control amid a cast of eccentric characters in this true murder-for-hire story from the underworld of big cat breeding.",
-                "title": "Tiger King",
-                "voteAverage": 6.925,
-                "voteCount": 339
-            }, {
-                "image": "https://image.tmdb.org/t/p/original/dXQCEjVth8P8L47XIsoRt0oL8Gw.jpg",
-                "popularity": 11.217,
-                "release_date": "Fri, 20 Mar 2020 00:00:00 GMT",
-                "summary": "A zoo owner spirals out of control amid a cast of eccentric characters in this true murder-for-hire story from the underworld of big cat breeding.",
-                "title": "Tiger King",
-                "voteAverage": 6.925,
-                "voteCount": 339
-            }, {
-                "image": "https://image.tmdb.org/t/p/original/dXQCEjVth8P8L47XIsoRt0oL8Gw.jpg",
-                "popularity": 11.217,
-                "release_date": "Fri, 20 Mar 2020 00:00:00 GMT",
-                "summary": "A zoo owner spirals out of control amid a cast of eccentric characters in this true murder-for-hire story from the underworld of big cat breeding.",
-                "title": "Tiger King",
-                "voteAverage": 6.925,
-                "voteCount": 339
-            },
-        ],
-        songs: [{
+        },], tvShows: [{
+            "image": "https://image.tmdb.org/t/p/original/dXQCEjVth8P8L47XIsoRt0oL8Gw.jpg",
+            "popularity": 11.217,
+            "release_date": "Fri, 20 Mar 2020 00:00:00 GMT",
+            "summary": "A zoo owner spirals out of control amid a cast of eccentric characters in this true murder-for-hire story from the underworld of big cat breeding.",
+            "title": "Tiger King",
+            "voteAverage": 6.925,
+            "voteCount": 339
+        }, {
+            "image": "https://image.tmdb.org/t/p/original/dXQCEjVth8P8L47XIsoRt0oL8Gw.jpg",
+            "popularity": 11.217,
+            "release_date": "Fri, 20 Mar 2020 00:00:00 GMT",
+            "summary": "A zoo owner spirals out of control amid a cast of eccentric characters in this true murder-for-hire story from the underworld of big cat breeding.",
+            "title": "Tiger King",
+            "voteAverage": 6.925,
+            "voteCount": 339
+        }, {
+            "image": "https://image.tmdb.org/t/p/original/dXQCEjVth8P8L47XIsoRt0oL8Gw.jpg",
+            "popularity": 11.217,
+            "release_date": "Fri, 20 Mar 2020 00:00:00 GMT",
+            "summary": "A zoo owner spirals out of control amid a cast of eccentric characters in this true murder-for-hire story from the underworld of big cat breeding.",
+            "title": "Tiger King",
+            "voteAverage": 6.925,
+            "voteCount": 339
+        }, {
+            "image": "https://image.tmdb.org/t/p/original/dXQCEjVth8P8L47XIsoRt0oL8Gw.jpg",
+            "popularity": 11.217,
+            "release_date": "Fri, 20 Mar 2020 00:00:00 GMT",
+            "summary": "A zoo owner spirals out of control amid a cast of eccentric characters in this true murder-for-hire story from the underworld of big cat breeding.",
+            "title": "Tiger King",
+            "voteAverage": 6.925,
+            "voteCount": 339
+        }, {
+            "image": "https://image.tmdb.org/t/p/original/dXQCEjVth8P8L47XIsoRt0oL8Gw.jpg",
+            "popularity": 11.217,
+            "release_date": "Fri, 20 Mar 2020 00:00:00 GMT",
+            "summary": "A zoo owner spirals out of control amid a cast of eccentric characters in this true murder-for-hire story from the underworld of big cat breeding.",
+            "title": "Tiger King",
+            "voteAverage": 6.925,
+            "voteCount": 339
+        }, {
+            "image": "https://image.tmdb.org/t/p/original/dXQCEjVth8P8L47XIsoRt0oL8Gw.jpg",
+            "popularity": 11.217,
+            "release_date": "Fri, 20 Mar 2020 00:00:00 GMT",
+            "summary": "A zoo owner spirals out of control amid a cast of eccentric characters in this true murder-for-hire story from the underworld of big cat breeding.",
+            "title": "Tiger King",
+            "voteAverage": 6.925,
+            "voteCount": 339
+        }, {
+            "image": "https://image.tmdb.org/t/p/original/dXQCEjVth8P8L47XIsoRt0oL8Gw.jpg",
+            "popularity": 11.217,
+            "release_date": "Fri, 20 Mar 2020 00:00:00 GMT",
+            "summary": "A zoo owner spirals out of control amid a cast of eccentric characters in this true murder-for-hire story from the underworld of big cat breeding.",
+            "title": "Tiger King",
+            "voteAverage": 6.925,
+            "voteCount": 339
+        }, {
+            "image": "https://image.tmdb.org/t/p/original/dXQCEjVth8P8L47XIsoRt0oL8Gw.jpg",
+            "popularity": 11.217,
+            "release_date": "Fri, 20 Mar 2020 00:00:00 GMT",
+            "summary": "A zoo owner spirals out of control amid a cast of eccentric characters in this true murder-for-hire story from the underworld of big cat breeding.",
+            "title": "Tiger King",
+            "voteAverage": 6.925,
+            "voteCount": 339
+        }, {
+            "image": "https://image.tmdb.org/t/p/original/dXQCEjVth8P8L47XIsoRt0oL8Gw.jpg",
+            "popularity": 11.217,
+            "release_date": "Fri, 20 Mar 2020 00:00:00 GMT",
+            "summary": "A zoo owner spirals out of control amid a cast of eccentric characters in this true murder-for-hire story from the underworld of big cat breeding.",
+            "title": "Tiger King",
+            "voteAverage": 6.925,
+            "voteCount": 339
+        },], songs: [{
             "album": "Smells Like Teen Spirit (Arr. for Harp by Alexander Boldachev)",
             "artist": "Kurt Cobain",
             "externalUrl": "https://open.spotify.com/track/020QUTHjPxJ05XXaJbWEVv",
@@ -254,11 +267,9 @@ function List(props) {
     const [modalSummary, setModalSummary] = useState('');
     const currentSummary = '';
 
-    const renderTooltip = (props) => (
-        <Tooltip id="button-tooltip" {...props}>
-            Detailed suggestions and analytics
-        </Tooltip>
-    );
+    const renderTooltip = (props) => (<Tooltip id="button-tooltip" {...props}>
+        Detailed suggestions and analytics
+    </Tooltip>);
 
     function handleClose() {
         setShow(false);
@@ -280,21 +291,18 @@ function List(props) {
                 <h3>{props.type}</h3>
                 <h1>{props.name}</h1>
                 <div className="row">
-                    {dummyArr.movies.map((movie, idx) => (
-                        <Box movie={movie} handleShow={handleShow} renderTooltip={renderTooltip} />
-                    ))}
+                    {list.movies.map((movie, idx) => (
+                        <Box movie={movie} handleShow={handleShow} renderTooltip={renderTooltip}/>))}
                 </div>
                 <div className="row">
                     <h3>Tv Shows</h3>
-                    {dummyArr.tvShows.map((movie, idx) => (
-                        <Box movie={movie} handleShow={handleShow} renderTooltip={renderTooltip} />
-                    ))}
+                    {list.tvShows.map((movie, idx) => (
+                        <Box movie={movie} handleShow={handleShow} renderTooltip={renderTooltip}/>))}
                 </div>
                 <div className="row">
                     <h3>Songs</h3>
-                    {dummyArr.songs.map((movie, idx) => (
-                        <Box movie={movie} handleShow={handleShow} renderTooltip={renderTooltip} />
-                    ))}
+                    {list.songs.map((movie, idx) => (
+                        <Box movie={movie} handleShow={handleShow} renderTooltip={renderTooltip}/>))}
                 </div>
 
             </Container>
