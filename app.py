@@ -303,10 +303,29 @@ def user_recommendations():
     recs_list = get_user_recs(username)
 
     return Response(
-        response = json.dumps({"movies": recs_list["movieRecos"], "shows":recs_list["tvshowRecos"],"songs": recs_list["musicRecos"]}),
+        response=json.dumps(
+            {"movies": recs_list["movieRecos"], "shows": recs_list["tvshowRecos"], "songs": recs_list["musicRecos"]}),
         status=200,
         mimetype='application/json'
 
+    )
+
+
+@app.route("/heat-map")
+def get_map_data():
+    title = request.args.get('title')
+    url = "https://v1.nocodeapi.com/roygaurav21/gTrends/puGShdXubkrixEyH/list_trends?keywords={}".format(title)
+
+    response = urllib.request.urlopen(url)
+    data = response.read()
+    dict = json.loads(data)
+
+    print(dict[0]['items'][0])
+
+    return Response(
+        response=json.dumps(dict[0]['items'][0]),
+        status=200,
+        mimetype='application/json'
     )
 
 

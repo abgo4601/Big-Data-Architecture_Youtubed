@@ -67,7 +67,7 @@ const Gallery = ({ mediaType, id }) => {
   };
   useEffect(() => {
     fetchCredits();
-  }, [credits]);
+  }, []);
 
   return (
     <AliceCarousel
