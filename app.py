@@ -35,16 +35,26 @@ tmdb = TMDb(key=tmdbkey, language="en-US")
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 app.secret_key = os.getenv("SECRET_KEY")
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
-client_secrets_file = os.path.join(pathlib.Path(__file__).parent, "client_secrets.json")
 algorithm = os.getenv("ALGORITHM")
 BACKEND_URL=os.getenv("BACKEND_URL")
 FRONTEND_URL=os.getenv("FRONTEND_URL")
 
+CLIENT_CONFIG = {'web': {
+    'client_id': os.getenv("GOOGLE_CLIENT_ID"),
+    'project_id': os.getenv("GOOGLE_PROJECT_ID"),
+    'auth_uri': 'https://accounts.google.com/o/oauth2/auth',
+    'token_uri': 'https://www.googleapis.com/oauth2/v3/token',
+    'auth_provider_x509_cert_url': 'https://www.googleapis.com/oauth2/v1/certs',
+    'client_secret': os.getenv("GOOGLE_CLIENT_SECRET"),
+    'redirect_uris': os.getenv("GOOGLE_REDIRECT_URIS"),
+    'javascript_origins': os.getenv("GOOGLE_JAVASCRIPT_ORIGINS")
+}}
+
 #database connection
 connect_db()
 
-flow = Flow.from_client_secrets_file(
-    client_secrets_file=client_secrets_file,
+flow = Flow.from_client_config(
+    CLIENT_CONFIG,
     scopes=[
         "https://www.googleapis.com/auth/userinfo.profile",
         "https://www.googleapis.com/auth/userinfo.email",
