@@ -51,11 +51,17 @@ const SingleData = ({
         <span className={` tag ${setVoteClass(vote_average)} vote__tag`}>
           {Math.round(vote_average * 10) / 10}
         </span>
+        <div>
+          {mediaType !== "Song" ? (
+            <img
+              src={poster_path ? `${img_300}/${poster_path}` : unavailable}
+              alt=''
+            />
+          ) : (
+            <img src={poster_path} alt='' />
+          )}
+        </div>
 
-        <img
-          src={poster_path ? `${img_300}/${poster_path}` : unavailable}
-          alt=''
-        />
         <div className='read__more'>
           <PlayArrowRoundedIcon
             style={{
