@@ -3,6 +3,8 @@ from mongoengine import connect
 from model import User
 import uuid
 import os
+from pymongo import MongoClient
+
 
 def connect_db():
     try:
@@ -31,6 +33,25 @@ def insert_into_db(username, email,movies,shows,songs):
             print({"_id": str(new_user["id"]), "message": "User created"})
     except Exception as e:
         print({"error": e.args})
+
+def get_user_recs(username):
+    try:
+        # Making Connection
+        mongoClient =os.getenv("CLUSTER_URL")
+    
+        # database
+        db = mongoClient["youtubed"]
+        
+        # Select to collection
+        Collection = db["youtubed"]
+        
+        # Filtering in User by username
+        result = Collection.find({"username": username})
+    except Exception as e:
+        print({"error": e.args})
+
+
+    return result
 
 # connect_db()
 # insert_into_db("Hello","tovarunb@gmail.com",

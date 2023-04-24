@@ -11,7 +11,7 @@ from google_auth_oauthlib.flow import Flow
 import os, pathlib
 import google
 from model import User
-from connect_db import connect_db, insert_into_db
+from connect_db import connect_db, insert_into_db,get_user_recs
 import jwt
 from flask_cors import CORS
 from themoviedb import TMDb
@@ -294,6 +294,19 @@ def home_page_user():
         response=json.dumps(decoded_jwt),
         status=200,
         mimetype='application/json'
+    )
+
+@app.route("/user/recommendations")
+def user_recommendations():
+    username = request.args.get('username')
+
+    recs_list = get_user_recs(username)
+
+    return Response(
+        response = json.dumps({"movies": recs_list["movieRecos"], "shows":recs_list["tvshowRecos"],"songs": recs_list["musicRecos"]}),
+        status=200,
+        mimetype='application/json'
+
     )
 
 
