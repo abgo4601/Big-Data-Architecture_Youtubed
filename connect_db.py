@@ -37,7 +37,7 @@ def insert_into_db(username, email,movies,shows,songs):
 def get_user_recs(username):
     try:
         # Making Connection
-        mongoClient =os.getenv("CLUSTER_URL")
+        mongoClient =MongoClient(os.getenv("CLUSTER_URL"))
     
         # database
         db = mongoClient["youtubed"]
