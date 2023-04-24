@@ -35,7 +35,7 @@ tmdb = TMDb(key=tmdbkey, language="en-US")
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 app.secret_key = os.getenv("SECRET_KEY")
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
-client_secrets_file = os.path.join(pathlib.Path(__file__).parent, "client-secret.json")
+client_secrets_file = os.path.join(pathlib.Path(__file__).parent, "client_secrets.json")
 algorithm = os.getenv("ALGORITHM")
 BACKEND_URL=os.getenv("BACKEND_URL")
 FRONTEND_URL=os.getenv("FRONTEND_URL")
@@ -51,7 +51,7 @@ flow = Flow.from_client_secrets_file(
         "openid",
         'https://www.googleapis.com/auth/youtube.readonly'
     ],
-    redirect_uri=BACKEND_URL+"/callback",
+    redirect_uri="http://127.0.0.1:5000/callback",
 )
 
 
@@ -266,31 +266,6 @@ def logout():
         status=202,
         mimetype='application/json'
     )
-
-@app.route('/movies', methods=['GET'])
-def get_movie_details():
-    # check if user is authenticated with JWT token
-    encoded_jwt = request.headers.get('Authorization').split("Bearer ")[1]
-    try:
-        decoded_jwt=jwt.decode(encoded_jwt, app.secret_key, algorithms=[algorithm,])
-        print(decoded_jwt)
-    except Exception as e: 
-        return Response(
-            response=json.dumps({"message":"Decoding JWT Failed", "exception":e.args}),
-            status=500,
-            mimetype='application/json'
-        )
-    movie = User.
-    if not movie:
-        abort(404, f'Movie with ID {movie_id} not found')
-    # return movie details as JSON response
-    return jsonify({
-        'title': movie['title'],
-        'year': movie['year'],
-        'genre': movie['genre'],
-        'rating': movie['rating']
-    })
-
 
 @app.route("/home")
 @login_required
