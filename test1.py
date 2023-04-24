@@ -1,23 +1,16 @@
-import json
-from flask import Flask,jsonify 
-from flask.wrappers import Response
-from flask.globals import request, session
-import requests
-from dotenv import load_dotenv
-from werkzeug.exceptions import abort
-from werkzeug.utils import redirect
+from flask import Flask, redirect, request, session, url_for, jsonify
 from google.oauth2 import id_token
-from google_auth_oauthlib.flow import Flow
-import os, pathlib
-import google
-from model import User
-from connect_db import connect_db, insert_into_db
-import jwt
+from google.auth.transport import requests
+from functools import wraps
+from dotenv import load_dotenv
 from flask_cors import CORS
-from themoviedb import TMDb
-import openai
+import os,pathlib
+from google_auth_oauthlib.flow import Flow
 from googleapiclient.discovery import build
 from pip._vendor import cachecontrol
+import google
+from themoviedb import TMDb
+import openai
 
 app = Flask(__name__)
 load_dotenv()
@@ -31,17 +24,25 @@ spotify_secret=os.getenv("SPOTIFY_CLIENT_SECRET")
 
 tmdb = TMDb(key=tmdbkey, language="en-US")
 
-# bypass http
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 app.secret_key = os.getenv("SECRET_KEY")
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 client_secrets_file = os.path.join(pathlib.Path(__file__).parent, "client-secret.json")
-algorithm = os.getenv("ALGORITHM")
 BACKEND_URL=os.getenv("BACKEND_URL")
-FRONTEND_URL=os.getenv("FRONTEND_URL")
 
-#database connection
-connect_db()
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'google_id' not in session:
+            return redirect(url_for('login', next=request.url))
+        return f(*args, **kwargs)
+    return decorated_function
+
+@app.route('/login')
+def login():
+    next_url = request.args.get('next') or url_for('home')
+    session['next_url'] = next_url
+    return redirect(url_for('google_login'))
 
 flow = Flow.from_client_secrets_file(
     client_secrets_file=client_secrets_file,
@@ -53,23 +54,6 @@ flow = Flow.from_client_secrets_file(
     ],
     redirect_uri=BACKEND_URL+"/callback",
 )
-
-
-# wrapper
-def login_required(function):
-    def wrapper(*args, **kwargs):
-        encoded_jwt=request.headers.get("Authorization").split("Bearer ")[1]
-        if encoded_jwt==None:
-            return abort(401)
-        else:
-            return function()
-    return wrapper
-
-
-def Generate_JWT(payload):
-    encoded_jwt = jwt.encode(payload, app.secret_key, algorithm=algorithm)
-    return encoded_jwt
-
 
 def get_recommendations(tags):
     openai.api_key = os.getenv("OPENAI_API_KEY")
@@ -180,11 +164,6 @@ def parse_recommendations(recommendations):
                 if line:
                     songs.append(line.split(". ")[1])
 
-    # uncomment for debugging purpose for testing response
-    # print('TV Shows:', shows)
-    # print('Movies:', movies)
-    # print('Songs:', songs)
-
     if not movies:
         movies=['The Shawshank Redemption', 'The Dark Knight', 'The Godfather', 'Inception', "Schindler's List", 'The Lord of the Rings', 'Fight Club', 'Forrest Gump', 'The Matrix', 'Star Wars', 'Good Will Hunting', 'Pulp Fiction', 'The Silence of the Lambs', 'The Green Mile', 'Gladiator']
 
@@ -200,23 +179,23 @@ def parse_recommendations(recommendations):
 
     return [movie_details,show_details,song_details]
 
-@app.route("/callback")
+@app.route('/google-login')
+def google_login():
+    authorization_url, state = flow.authorization_url()
+    return redirect(authorization_url)
+
+res=[]
+
+@app.route('/callback')
 def callback():
     flow.fetch_token(authorization_response=request.url)
     credentials = flow.credentials
-    request_session = requests.session()
-    cached_session = cachecontrol.CacheControl(request_session)
-    token_request = google.auth.transport.requests.Request(session=cached_session)
-
     id_info = id_token.verify_oauth2_token(
-        id_token=credentials._id_token, request=token_request,
-        audience=GOOGLE_CLIENT_ID,clock_skew_in_seconds=10
+        credentials._id_token, requests.Request(),audience=GOOGLE_CLIENT_ID,clock_skew_in_seconds=10
     )
-    session["google_id"] = id_info.get("sub")
-    
-    # removing the specific audience, as it is throwing error
-    del id_info['aud']
-    jwt_token=Generate_JWT(id_info)
+    session['google_id'] = id_info['sub']
+    next_url = session.pop('next_url', '/home')
+
     youtube = build('youtube', 'v3', credentials=credentials)
 
     results = youtube.videos().list(
@@ -232,85 +211,15 @@ def callback():
                 if t not in video_tags:
                     video_tags.append(t)
 
-    # recommendations = get_recommendations(video_tags)
-    # res=parse_recommendations(recommendations)
+    recommendations = get_recommendations(video_tags)
+    res=parse_recommendations(recommendations)
 
-    # insert_into_db(
-    #     id_info.get('name'),
-    #     id_info.get('email'),
-    #     res[0],
-    #     res[1],
-    #     res[2]
-    # )
-    # return {"jwt": jwt_token,"email": id_info.get("email")}
-    return redirect(f"{FRONTEND_URL}?jwt={jwt_token}")
+    return redirect(next_url)
 
-@app.route("/auth/google")
-def login():
-    authorization_url, state = flow.authorization_url()
-    # Store the state so the callback can verify the auth server response.
-    session["state"] = state
-    return Response(
-        response=json.dumps({'auth_url':authorization_url}),
-        status=200,
-        mimetype='application/json'
-    )
-
-
-@app.route("/logout")
-def logout():
-    #clear the local storage from frontend
-    session.clear()
-    return Response(
-        response=json.dumps({"message":"Logged out"}),
-        status=202,
-        mimetype='application/json'
-    )
-
-@app.route('/movies', methods=['GET'])
-def get_movie_details():
-    # check if user is authenticated with JWT token
-    encoded_jwt = request.headers.get('Authorization').split("Bearer ")[1]
-    try:
-        decoded_jwt=jwt.decode(encoded_jwt, app.secret_key, algorithms=[algorithm,])
-        print(decoded_jwt)
-    except Exception as e: 
-        return Response(
-            response=json.dumps({"message":"Decoding JWT Failed", "exception":e.args}),
-            status=500,
-            mimetype='application/json'
-        )
-    movie = User.
-    if not movie:
-        abort(404, f'Movie with ID {movie_id} not found')
-    # return movie details as JSON response
-    return jsonify({
-        'title': movie['title'],
-        'year': movie['year'],
-        'genre': movie['genre'],
-        'rating': movie['rating']
-    })
-
-
-@app.route("/home")
+@app.route('/home')
 @login_required
-def home_page_user():
-    encoded_jwt=request.headers.get("Authorization").split("Bearer ")[1]
-    try:
-        decoded_jwt=jwt.decode(encoded_jwt, app.secret_key, algorithms=[algorithm,])
-        print(decoded_jwt)
-    except Exception as e: 
-        return Response(
-            response=json.dumps({"message":"Decoding JWT Failed", "exception":e.args}),
-            status=500,
-            mimetype='application/json'
-        )
-    return Response(
-        response=json.dumps(decoded_jwt),
-        status=200,
-        mimetype='application/json'
-    )
-
+def home():
+    return jsonify(res)
 
 if __name__ == "__main__":
     app.run(debug=True, port=5000, host="0.0.0.0")

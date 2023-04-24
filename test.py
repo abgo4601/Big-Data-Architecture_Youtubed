@@ -93,14 +93,13 @@ def fetch_song_details(collection):
         json_response = response.json()
         if(json_response['tracks']['items']):
             out.append({
+                "poster_path": json_response['tracks']['items'][0]['album']['images'][0]['url'],
                 "title": json_response['tracks']['items'][0]['name'],
+                "id": json_response['tracks']['items'][0]['id'],
                 "artist": json_response['tracks']['items'][0]['artists'][0]['name'],
-                "album": json_response['tracks']['items'][0]['album']['name'],
-                "releaseDate": json_response['tracks']['items'][0]['album']['release_date'],
-                "popularity": json_response['tracks']['items'][0]['popularity'],
-                "image": json_response['tracks']['items'][0]['album']['images'][1]['url'],
-                "previewUrl": json_response['tracks']['items'][0]['preview_url'],
-                "externalUrl": json_response['tracks']['items'][0]['external_urls']['spotify']
+                "release_date": json_response['tracks']['items'][0]['album']['release_date'],
+                "vote_average": int(json_response['tracks']['items'][0]['popularity'])/10,
+                "mediaType": "Song"
             })
     return out
 
@@ -111,13 +110,12 @@ def fetch_movie_details(collection):
         if len(results)>0:
             top_result=results[0]
             out.append({
+                "poster_path": {top_result.poster_path},
                 "title": top_result.original_title,
-                "summary": top_result.overview,
+                "id": top_result.id,
+                "vote_average": top_result.vote_average,
                 "release_date": top_result.release_date.strftime('%Y-%m-%d'),
-                "popularity": top_result.popularity,
-                "voteAverage": top_result.vote_average,
-                "voteCount": top_result.vote_count,
-                "image": f"https://image.tmdb.org/t/p/original{top_result.poster_path}"
+                "mediaType": "Movie"
             })
     return out
 
@@ -128,13 +126,12 @@ def fetch_show_details(collection):
         if len(results)>0:
             top_result=results[0]
             out.append({
-                    "title": top_result.name,
-                    "summary": top_result.overview,
-                    "release_date": top_result.first_air_date.strftime('%Y-%m-%d'),
-                    "popularity": top_result.popularity,
-                    "voteAverage": top_result.vote_average,
-                    "voteCount": top_result.vote_count,
-                    "image": f"https://image.tmdb.org/t/p/original{top_result.poster_path}"
+                "poster_path": {top_result.poster_path},
+                "title": top_result.name,
+                "id": top_result.id,
+                "vote_average": top_result.vote_average,
+                "release_date": top_result.first_air_date.strftime('%Y-%m-%d'),
+                "mediaType": "Show"
                 })
     return out
 
@@ -165,11 +162,13 @@ def parse_recommendations(res):
     # print('TV Shows:', shows)
     # print('Movies:', movies)
     # print('Songs:', songs)
+
+    songs=songs=['Bohemian Rhapsody', 'Stairway to Heaven', 'Hotel California', 'Sweet Child O Mine', 'Imagine', 'Like a Rolling Stone', 'Hey Jude', 'Purple Haze', 'Smells Like Teen Spirit', 'Born to Run']
     
     song_details=fetch_song_details(songs)
     movie_details=fetch_movie_details(movies)
     show_details=fetch_show_details(shows)
 
-    return [song_details,movie_details,show_details]
+    return [song_details]
 
 print(parse_recommendations(res))
