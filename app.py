@@ -1,5 +1,5 @@
 import json
-from flask import Flask,jsonify 
+from flask import Flask, jsonify
 from flask.wrappers import Response
 from flask.globals import request, session
 import requests
@@ -11,23 +11,24 @@ from google_auth_oauthlib.flow import Flow
 import os, pathlib
 import google
 from model import User
-from connect_db import connect_db, insert_into_db,get_user_recs
+from connect_db import connect_db, insert_into_db, get_user_recs
 import jwt
 from flask_cors import CORS
 from themoviedb import TMDb
 import openai
 from googleapiclient.discovery import build
 from pip._vendor import cachecontrol
+import urllib.request, json
 
 app = Flask(__name__)
 load_dotenv()
 CORS(app)
 app.config['Access-Control-Allow-Origin'] = '*'
-app.config["Access-Control-Allow-Headers"]="Content-Type"
+app.config["Access-Control-Allow-Headers"] = "Content-Type"
 
-tmdbkey=os.getenv("TMDB_KEY")
-spotify_id=os.getenv("SPOTIFY_CLIENT_ID")
-spotify_secret=os.getenv("SPOTIFY_CLIENT_SECRET")
+tmdbkey = os.getenv("TMDB_KEY")
+spotify_id = os.getenv("SPOTIFY_CLIENT_ID")
+spotify_secret = os.getenv("SPOTIFY_CLIENT_SECRET")
 
 tmdb = TMDb(key=tmdbkey, language="en-US")
 
@@ -36,8 +37,8 @@ os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 app.secret_key = os.getenv("SECRET_KEY")
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 algorithm = os.getenv("ALGORITHM")
-BACKEND_URL=os.getenv("BACKEND_URL")
-FRONTEND_URL=os.getenv("FRONTEND_URL")
+BACKEND_URL = os.getenv("BACKEND_URL")
+FRONTEND_URL = os.getenv("FRONTEND_URL")
 
 CLIENT_CONFIG = {'web': {
     'client_id': os.getenv("GOOGLE_CLIENT_ID"),
@@ -50,7 +51,7 @@ CLIENT_CONFIG = {'web': {
     'javascript_origins': os.getenv("GOOGLE_JAVASCRIPT_ORIGINS")
 }}
 
-#database connection
+# database connection
 connect_db()
 
 flow = Flow.from_client_config(
@@ -68,11 +69,12 @@ flow = Flow.from_client_config(
 # wrapper
 def login_required(function):
     def wrapper(*args, **kwargs):
-        encoded_jwt=request.headers.get("Authorization").split("Bearer ")[1]
-        if encoded_jwt==None:
+        encoded_jwt = request.headers.get("Authorization").split("Bearer ")[1]
+        if encoded_jwt == None:
             return abort(401)
         else:
             return function()
+
     return wrapper
 
 
@@ -98,8 +100,9 @@ def get_recommendations(tags):
 
     return response.choices[0].text
 
+
 def fetch_song_details(collection):
-    out=[]
+    out = []
     AUTH_URL = "https://accounts.spotify.com/api/token"
 
     auth_response = requests.post(AUTH_URL, {
@@ -124,24 +127,25 @@ def fetch_song_details(collection):
         }
         response = requests.get(QUERY_URL, headers=headers, params=query_params)
         json_response = response.json()
-        if(json_response['tracks']['items']):
+        if (json_response['tracks']['items']):
             out.append({
                 "poster_path": json_response['tracks']['items'][0]['album']['images'][1]['url'],
                 "title": json_response['tracks']['items'][0]['name'],
                 "id": json_response['tracks']['items'][0]['id'],
                 "artist": json_response['tracks']['items'][0]['artists'][0]['name'],
                 "release_date": json_response['tracks']['items'][0]['album']['release_date'],
-                "vote_average": int(json_response['tracks']['items'][0]['popularity'])/10,
+                "vote_average": int(json_response['tracks']['items'][0]['popularity']) / 10,
                 "mediaType": "Song"
             })
     return out
 
+
 def fetch_movie_details(collection):
-    out=[]
+    out = []
     for movie in collection:
-        results=tmdb.search().movies(movie).results
-        if len(results)>0:
-            top_result=results[0]
+        results = tmdb.search().movies(movie).results
+        if len(results) > 0:
+            top_result = results[0]
             out.append({
                 "poster_path": {top_result.poster_path},
                 "title": top_result.original_title,
@@ -152,12 +156,13 @@ def fetch_movie_details(collection):
             })
     return out
 
+
 def fetch_show_details(collection):
-    out=[]
+    out = []
     for show in collection:
-        results=tmdb.search().tv(show).results
-        if len(results)>0:
-            top_result=results[0]
+        results = tmdb.search().tv(show).results
+        if len(results) > 0:
+            top_result = results[0]
             out.append({
                 "poster_path": {top_result.poster_path},
                 "title": top_result.name,
@@ -165,13 +170,14 @@ def fetch_show_details(collection):
                 "vote_average": top_result.vote_average,
                 "release_date": top_result.first_air_date.strftime('%Y-%m-%d'),
                 "mediaType": "Show"
-                })
+            })
     return out
 
+
 def parse_recommendations(recommendations):
-    shows=[]
-    movies=[]
-    songs=[]
+    shows = []
+    movies = []
+    songs = []
 
     # Split the text response into separate sections for each category
     sections = recommendations.split("\n\n")
@@ -196,19 +202,25 @@ def parse_recommendations(recommendations):
     # print('Songs:', songs)
 
     if not movies:
-        movies=['The Shawshank Redemption', 'The Dark Knight', 'The Godfather', 'Inception', "Schindler's List", 'The Lord of the Rings', 'Fight Club', 'Forrest Gump', 'The Matrix', 'Star Wars', 'Good Will Hunting', 'Pulp Fiction', 'The Silence of the Lambs', 'The Green Mile', 'Gladiator']
+        movies = ['The Shawshank Redemption', 'The Dark Knight', 'The Godfather', 'Inception', "Schindler's List",
+                  'The Lord of the Rings', 'Fight Club', 'Forrest Gump', 'The Matrix', 'Star Wars', 'Good Will Hunting',
+                  'Pulp Fiction', 'The Silence of the Lambs', 'The Green Mile', 'Gladiator']
 
     if not shows:
-        shows=['The Big Bang Theory', 'Stranger Things', 'Game of Thrones', 'Rick and Morty', 'Breaking Bad', 'Friends', 'The Walking Dead', 'The Crown', 'Westworld', 'The Office', 'Doctor Who', "Grey's Anatomy", "The Handmaid's Tale", 'Black Mirror', 'This Is Us']
+        shows = ['The Big Bang Theory', 'Stranger Things', 'Game of Thrones', 'Rick and Morty', 'Breaking Bad',
+                 'Friends', 'The Walking Dead', 'The Crown', 'Westworld', 'The Office', 'Doctor Who', "Grey's Anatomy",
+                 "The Handmaid's Tale", 'Black Mirror', 'This Is Us']
 
     if not songs:
-        songs=['Bohemian Rhapsody', 'Stairway to Heaven', 'Hotel California', 'Sweet Child O Mine', 'Imagine', 'Like a Rolling Stone', 'Hey Jude', 'Purple Haze', 'Smells Like Teen Spirit', 'Born to Run']
+        songs = ['Bohemian Rhapsody', 'Stairway to Heaven', 'Hotel California', 'Sweet Child O Mine', 'Imagine',
+                 'Like a Rolling Stone', 'Hey Jude', 'Purple Haze', 'Smells Like Teen Spirit', 'Born to Run']
 
-    song_details=fetch_song_details(songs)
-    movie_details=fetch_movie_details(movies)
-    show_details=fetch_show_details(shows)
+    song_details = fetch_song_details(songs)
+    movie_details = fetch_movie_details(movies)
+    show_details = fetch_show_details(shows)
 
-    return [movie_details,show_details,song_details]
+    return [movie_details, show_details, song_details]
+
 
 @app.route("/callback")
 def callback():
@@ -220,13 +232,13 @@ def callback():
 
     id_info = id_token.verify_oauth2_token(
         id_token=credentials._id_token, request=token_request,
-        audience=GOOGLE_CLIENT_ID,clock_skew_in_seconds=10
+        audience=GOOGLE_CLIENT_ID, clock_skew_in_seconds=10
     )
     session["google_id"] = id_info.get("sub")
-    
+
     # removing the specific audience, as it is throwing error
     del id_info['aud']
-    jwt_token=Generate_JWT(id_info)
+    jwt_token = Generate_JWT(id_info)
     youtube = build('youtube', 'v3', credentials=credentials)
 
     results = youtube.videos().list(
@@ -255,13 +267,14 @@ def callback():
     # return {"jwt": jwt_token,"email": id_info.get("email")}
     return redirect(f"{FRONTEND_URL}?jwt={jwt_token}")
 
+
 @app.route("/auth/google")
 def login():
     authorization_url, state = flow.authorization_url()
     # Store the state so the callback can verify the auth server response.
     session["state"] = state
     return Response(
-        response=json.dumps({'auth_url':authorization_url}),
+        response=json.dumps({'auth_url': authorization_url}),
         status=200,
         mimetype='application/json'
     )
@@ -269,24 +282,25 @@ def login():
 
 @app.route("/logout")
 def logout():
-    #clear the local storage from frontend
+    # clear the local storage from frontend
     session.clear()
     return Response(
-        response=json.dumps({"message":"Logged out"}),
+        response=json.dumps({"message": "Logged out"}),
         status=202,
         mimetype='application/json'
     )
 
+
 @app.route("/home")
 @login_required
 def home_page_user():
-    encoded_jwt=request.headers.get("Authorization").split("Bearer ")[1]
+    encoded_jwt = request.headers.get("Authorization").split("Bearer ")[1]
     try:
-        decoded_jwt=jwt.decode(encoded_jwt, app.secret_key, algorithms=[algorithm,])
+        decoded_jwt = jwt.decode(encoded_jwt, app.secret_key, algorithms=[algorithm, ])
         print(decoded_jwt)
-    except Exception as e: 
+    except Exception as e:
         return Response(
-            response=json.dumps({"message":"Decoding JWT Failed", "exception":e.args}),
+            response=json.dumps({"message": "Decoding JWT Failed", "exception": e.args}),
             status=500,
             mimetype='application/json'
         )
@@ -295,6 +309,7 @@ def home_page_user():
         status=200,
         mimetype='application/json'
     )
+
 
 @app.route("/user/recommendations")
 def user_recommendations():
@@ -320,13 +335,16 @@ def get_map_data():
     data = response.read()
     dict = json.loads(data)
 
-    print(dict[0]['items'][0])
+    print(dict[0]['items'][0]['data'])
+    geo_name = []
+    geo_values = []
 
-    return Response(
-        response=json.dumps(dict[0]['items'][0]),
-        status=200,
-        mimetype='application/json'
-    )
+    for item in dict[0]['items'][1]['data']:
+        if item['values'][0] is not None:
+            geo_name.append(item['geo_name'])
+            geo_values.append(item['values'][0])
+
+    return jsonify({"region": {"countries": geo_name, "values": geo_values}, "date_wise": []})
 
 
 if __name__ == "__main__":
