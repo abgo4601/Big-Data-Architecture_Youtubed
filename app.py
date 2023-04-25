@@ -306,7 +306,6 @@ def user_recommendations():
         response = json.dumps({"movies": recs_list["movieRecos"], "shows":recs_list["tvshowRecos"],"songs": recs_list["musicRecos"]}),
         status=200,
         mimetype='application/json'
-
     )
 
 

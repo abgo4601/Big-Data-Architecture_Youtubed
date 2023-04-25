@@ -1,9 +1,8 @@
-import React, { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import Google from "../../images/google.svg";
 import "./SignIn.css";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-
 export const BACKEND_URL = "http://127.0.0.1:5000";
 
 const SignIn = () => {
@@ -23,17 +22,6 @@ const SignIn = () => {
       })
       .catch((err) => console.log(err));
   };
-
-  useEffect(() => {
-    if (localStorage.getItem("JWT") == null) {
-      const query = new URLSearchParams(window.location.search);
-      const token = query.get("jwt");
-      if (token) {
-        localStorage.setItem("JWT", token);
-        return nav("/home");
-      }
-    }
-  });
 
   return (
     <React.Fragment>

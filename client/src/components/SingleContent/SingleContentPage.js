@@ -21,6 +21,8 @@ const SinglePage = () => {
   const [color, setColor] = useState("grey");
   const { id, mediaType } = useParams();
 
+  console.log(id, mediaType);
+
   const nav = useNavigate();
 
   const fetchData = async () => {
