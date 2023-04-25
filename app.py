@@ -18,6 +18,7 @@ from themoviedb import TMDb
 import openai
 from googleapiclient.discovery import build
 from pip._vendor import cachecontrol
+import json
 
 app = Flask(__name__)
 load_dotenv()
@@ -85,7 +86,7 @@ def get_recommendations(tags):
     openai.api_key = os.getenv("OPENAI_API_KEY")
 
     model_engine = "text-davinci-003"
-    prompt = f"Recommend me names of top 15 TV shows, movies that are listed on IMDB and songs listed on Spotify based on the following tags: {tags}."
+    prompt = f"Recommend me names of top 15 TV shows, movies that are listed on IMDB and songs listed on Spotify based on the following tags: {tags}. Return the response in json format with having keys as shows, movies, songs"
 
     response = openai.Completion.create(
         engine=model_engine,
@@ -176,6 +177,13 @@ def parse_recommendations(recommendations):
     # Split the text response into separate sections for each category
     sections = recommendations.split("\n\n")
 
+    json_data = json.loads(sections[1])
+
+    shows = json_data["shows"]
+    movies = json_data["movies"]
+    songs = json_data["songs"]
+    """
+    Remove this code if the above is working fine
     for section in sections:
         if "TV Shows:" in section:
             for line in section.split("\n")[1:]:
@@ -189,6 +197,7 @@ def parse_recommendations(recommendations):
             for line in section.split("\n")[1:]:
                 if line:
                     songs.append(line.split(". ")[1])
+    """
 
     # uncomment for debugging purpose for testing response
     # print('TV Shows:', shows)
