@@ -328,8 +328,10 @@ def user_recommendations():
 
 @app.route("/heat-map")
 def get_map_data():
-    title = request.args.get('title')
+    title = request.args.getlist('title')
+    print(title)
     url = "https://v1.nocodeapi.com/roygaurav21/gTrends/puGShdXubkrixEyH/list_trends?keywords={}".format(title)
+    url = url.replace(" ", "%20")
 
     response = urllib.request.urlopen(url)
     data = response.read()

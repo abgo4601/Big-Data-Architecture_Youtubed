@@ -6,7 +6,7 @@ function Map({title}) {
 
     useEffect(() => {
         const fetchAPI = async () => {
-            const response = await axios.get(`https://v1.nocodeapi.com/roygaurav21/gTrends/puGShdXubkrixEyH/list_trends?keywords=${title}`)
+            const response = await axios.get(`http://localhost:5000/heat-map?title=${title}`)
             console.log('title', response);
         }
         fetchAPI()

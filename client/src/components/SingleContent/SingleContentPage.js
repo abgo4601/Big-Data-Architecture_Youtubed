@@ -321,7 +321,7 @@ const SinglePage = () => {
                             <Carousel mediaType={mediaType} id={id}/>
                         </div>
                     </div>
-                    <Map title={'Pulp Fiction'}/>
+                    <Map title={encodeURIComponent(content.original_title)}/>
                     <div className='similar__shows'>
                         <div className='btn__title'>
                             <h5>You May Also Like </h5>
