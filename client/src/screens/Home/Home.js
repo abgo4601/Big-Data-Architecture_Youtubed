@@ -16,15 +16,7 @@ const Home = () => {
   const [songs, setSongs] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    if (localStorage.getItem("token") == null) {
-      const query = new URLSearchParams(window.location.search);
-      const token = query.get("token");
-      if (token) {
-        localStorage.setItem("token", token);
-      }
-    }
-
+  const fetchRecos = () => {
     axios
       .get(`${BACKEND_URL}/recommendations`, {
         headers: {
@@ -38,7 +30,18 @@ const Home = () => {
         setIsLoading(true);
       })
       .catch((err) => console.log(err));
-  });
+  };
+
+  useEffect(() => {
+    if (localStorage.getItem("token") == null) {
+      const query = new URLSearchParams(window.location.search);
+      const token = query.get("token");
+      if (token) {
+        localStorage.setItem("token", token);
+      }
+    }
+    fetchRecos();
+  }, []);
 
   // eslint-disable-next-line
   let [color, setColor] = useState("grey");

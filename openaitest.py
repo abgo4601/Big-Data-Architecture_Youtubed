@@ -24,7 +24,7 @@ def get_recommendations():
           "study"]
 
     model_engine = "text-davinci-003"
-    prompt = f"Recommend me names of top 15 TV shows, movies that are listed on IMDB and songs listed on Spotify based on the following tags: {tags}. Return the response in json format with having keys as shows, movies, songs"
+    prompt = f"Recommend me names of top 15 TV shows, movies that are listed on IMDB and songs listed on Spotify based on the following tags: {tags}. Return the response in json format with keys as shows, movies, songs"
 
     response = openai.Completion.create(
         engine=model_engine,

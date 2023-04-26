@@ -83,7 +83,7 @@ def get_recommendations(tags):
     openai.api_key = os.getenv("OPENAI_API_KEY")
 
     model_engine = "text-davinci-003"
-    prompt = f"Recommend me names of top 15 TV shows, movies that are listed on IMDB and songs listed on Spotify based on the following tags: {tags}."
+    prompt = f"Recommend me names of top 15 TV shows, movies that are listed on IMDB and songs listed on Spotify based on the following tags: {tags}. Return the response in json format with keys as shows, movies, songs"
 
     response = openai.Completion.create(
         engine=model_engine,
@@ -166,27 +166,19 @@ def fetch_show_details(collection):
                 })
     return out
 
-def parse_recommendations():
+def parse_recommendations(recommendations):
     shows=[]
     movies=[]
     songs=[]
 
-    # Split the text response into separate sections for each category
-    # sections = recommendations.split("\n\n")
+    sections = recommendations.split("\n\n")
+    json_data = json.loads(sections[1])
+    print(json_data)
+    lowercase_json={key.lower(): value for key,value in json_data.items()}
 
-    # for section in sections:
-    #     if "TV Shows:" in section:
-    #         for line in section.split("\n")[1:]:
-    #             if line:
-    #                 shows.append(line.split(". ")[1].split(" (")[0])
-    #     elif "Movies:" in section:
-    #         for line in section.split("\n")[1:]:
-    #             if line:
-    #                 movies.append(line.split(". ")[1].split(" (")[0])
-    #     elif "Songs:" in section:
-    #         for line in section.split("\n")[1:]:
-    #             if line:
-    #                 songs.append(line.split(". ")[1])
+    shows=lowercase_json["shows"]
+    movies=lowercase_json["movies"]
+    songs=lowercase_json["songs"]
 
     if not movies:
         movies=['The Shawshank Redemption', 'The Dark Knight', 'The Godfather', 'Inception', "Schindler's List", 'The Lord of the Rings', 'Fight Club', 'Forrest Gump', 'The Matrix', 'Star Wars', 'Good Will Hunting', 'Pulp Fiction', 'The Silence of the Lambs', 'The Green Mile', 'Gladiator']
@@ -246,8 +238,8 @@ def callback():
                 if t not in video_tags:
                     video_tags.append(t)
     
-    # recommendations = get_recommendations(video_tags)
-    res=parse_recommendations()
+    recommendations = get_recommendations(video_tags)
+    res=parse_recommendations(recommendations)
 
     users = mongo.db.users
     existing_user = users.find_one({'email': id_info.get('email')}, {'_id': 0})
