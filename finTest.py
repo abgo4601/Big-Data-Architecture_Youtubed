@@ -145,7 +145,7 @@ def fetch_movie_details(collection):
                 "title": str(top_result.original_title),
                 "id": int(top_result.id),
                 "vote_average": float(top_result.vote_average),
-                "release_date": top_result.release_date.strftime('%Y-%m-%d'),
+                "release_date": top_result.release_date.strftime('%Y-%m-%d') or "2023-01-01",
                 "mediaType": "Movie"
             })
     return out
@@ -161,7 +161,7 @@ def fetch_show_details(collection):
                 "title": str(top_result.name),
                 "id": int(top_result.id),
                 "vote_average": float(top_result.vote_average),
-                "release_date": top_result.first_air_date.strftime('%Y-%m-%d'),
+                "release_date": top_result.first_air_date.strftime('%Y-%m-%d') or "2023-01-01",
                 "mediaType": "tv"
                 })
     return out
