@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { img_300, unavailable, img_500 } from "../../images/Default";
 import SingleData from "../SingleData/SingleData";
+import LineGraph from "../LineGraph/LineGraph";
 import "./SinglePage.css";
 import Myloader from "react-spinners/ClipLoader";
 
@@ -170,11 +171,10 @@ const SinglePage = () => {
               <div
                 className='open__modal'
                 style={{
-                  backgroundImage: `url(${
-                    mediaType === "Song"
-                      ? `${content.backdrop_path}`
-                      : `https://www.themoviedb.org/t/p/w1920_and_h800_multi_faces/${content.backdrop_path}`
-                  })`,
+                  backgroundImage: `url(${mediaType === "Song"
+                    ? `${content.backdrop_path}`
+                    : `https://www.themoviedb.org/t/p/w1920_and_h800_multi_faces/${content.backdrop_path}`
+                    })`,
                 }}
               >
                 <div className='poster__img'>
@@ -314,7 +314,9 @@ const SinglePage = () => {
           </div>
           <div className='all__cast px-5 pt-5'>
             <div className='cast__title'>
+              <LineGraph />
               <h2>Cast</h2>
+
             </div>
             <div>
               <Carousel mediaType={mediaType} id={id} />
@@ -329,6 +331,7 @@ const SinglePage = () => {
                 similarMovies.map((n) => <SingleData key={n.id} {...n} />)}
             </div>
           </div>
+
         </>
       ) : (
         <div className='load_app' style={{ height: "500px" }}>
@@ -340,6 +343,7 @@ const SinglePage = () => {
             Loading Please Wait...
           </p>
         </div>
+
       )}
     </>
   );
