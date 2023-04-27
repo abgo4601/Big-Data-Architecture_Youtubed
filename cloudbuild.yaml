@@ -77,13 +77,15 @@ steps:
 #      - 'kubernetes/deployment.yaml'
 
   - name: 'gcr.io/cloud-builders/gcloud'
-    entrypoint: 'bash'
     args:
-      - '-c'
-      - |
-        gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS}
-        gcloud config set project ${PROJECT_ID}
-        gcloud container clusters get-credentials my-cluster --zone us-central1-a
+      - 'container'
+      - 'clusters'
+      - 'cluster-2'
+      - 'get-credentials'
+      - '--zone'
+      - 'us-central1-a'
+      - '--project'
+      - 'big-data-arch-youtubed'
 
   # Deploy the Kubernetes deployment configuration
   - name: 'gcr.io/cloud-builders/kubectl'
@@ -91,6 +93,22 @@ steps:
       - 'apply'
       - '-f'
       - 'kubernetes/deployment.yaml'
+
+#  - name: 'gcr.io/cloud-builders/gcloud'
+#    entrypoint: 'bash'
+#    args:
+#      - '-c'
+#      - |
+#        gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS}
+#        gcloud config set project ${PROJECT_ID}
+#        gcloud container clusters get-credentials my-cluster --zone us-central1-a
+#
+#  # Deploy the Kubernetes deployment configuration
+#  - name: 'gcr.io/cloud-builders/kubectl'
+#    args:
+#      - 'apply'
+#      - '-f'
+#      - 'kubernetes/deployment.yaml'
 
   # - name: "gcr.io/cloud-builders/docker"
   #   args: ["push", "gcr.io/$PROJECT_ID/nginx"]
