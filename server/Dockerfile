@@ -5,3 +5,5 @@ COPY requirements.txt /backend/requirements.txt
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 COPY . .
+# Expose port for backend
+EXPOSE 5000
