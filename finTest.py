@@ -18,6 +18,7 @@ import openai
 import google
 from pip._vendor import cachecontrol
 from googleapiclient.discovery import build
+from elasticsearch import Elasticsearch
 
 app = Flask(__name__)
 load_dotenv()
@@ -53,6 +54,19 @@ spotify_id=os.getenv("SPOTIFY_CLIENT_ID")
 spotify_secret=os.getenv("SPOTIFY_CLIENT_SECRET")
 
 tmdb = TMDb(key=tmdbkey, language="en-US")
+
+ELASTIC_PASSWORD = "JLuHzd3N58xmJ8fBdmTYYW3e"
+
+# Found in the 'Manage Deployment' page
+CLOUD_ID = "youtubed:dXMtY2VudHJhbDEuZ2NwLmNsb3VkLmVzLmlvOjQ0MyRlNmU4YzMyYTljNzI0ZjMyYmI0MzVhN2ZjZGQxNGFlNCQ4ODczZDUyMDA0NjI0OTZhOTNmNmQzMjgzMzYyYzZlZg=="
+
+# Create the client instance
+client = Elasticsearch(
+    cloud_id=CLOUD_ID,
+    basic_auth=("elastic", ELASTIC_PASSWORD)
+)
+
+BASE_URL = 'https://api.pushshift.io'
 
 def login_required(function):
     def wrapper(*args, **kwargs):
@@ -237,13 +251,13 @@ def callback():
             for t in item["snippet"]["tags"]:
                 if t not in video_tags:
                     video_tags.append(t)
-    
-    recommendations = get_recommendations(video_tags)
-    res=parse_recommendations(recommendations)
 
     users = mongo.db.users
     existing_user = users.find_one({'email': id_info.get('email')}, {'_id': 0})
+
     if existing_user is None:
+        recommendations = get_recommendations(video_tags)
+        res=parse_recommendations(recommendations)
         new_user = User(id_info.get('name'),id_info.get('email'),res[0],res[1],res[2])
         user_data_to_save = new_user.dict()
         users.insert_one(user_data_to_save)
@@ -270,6 +284,48 @@ def user_recommendations():
          mimetype='application/json'
     )
 
+@app.route('/apiv1/search/<string:searchString>' , methods=['GET'])
+def searchComment(searchString: str):
+    result = []
+    esResult = client.search(
+        index='reddit-comments',
+        query={
+        'match': {'search_term': searchString}
+        }
+    )
+    commentsList = esResult['hits']['hits']
+    size = len(commentsList)
+    if commentsList is None or size == 0:
+        result = updateCommentToEs(searchString)
+    else:
+      for list in commentsList:
+        comment = {}
+        comment['comment'] = list['_source']['comment']
+        comment['timestamp'] = list['_source']['timestamp']
+        result.append(comment)
+    return Response(response=json.dumps(result), status=200, mimetype="application/json")
+
+def updateCommentToEs(searchString: str):
+   result = [] 
+   query = "reddit/comment/search/?q="+searchString+"&after=7d"
+   response = requests.get(f"{BASE_URL}/{query}")
+   commentsList = response.json().get('data')
+   commentsList = response.json().get('data')
+   for list in commentsList:
+       comment = {}
+       if list.get('author_flair_type') == 'text':
+               client.index(
+                   index='reddit-comments',
+                   document={
+                       'search_term': searchString,
+                       'comment': list.get('body'),
+                       'timestamp': list.get('created_utc')
+                   })
+               comment['comment'] = list.get('body')
+               comment['timestamp'] = list.get('created_utc')
+               result.append(comment)
+   client.indices.refresh(index='reddit-comments')    
+   return result   
 
 if __name__ == "__main__":
     app.run(debug=True, port=5000, host="0.0.0.0")

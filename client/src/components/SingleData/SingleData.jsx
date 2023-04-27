@@ -29,7 +29,7 @@ const SingleData = ({
   const nav = useNavigate();
 
   const handleClick = () => {
-    nav(`/${mediaType || media_type}/${id}`);
+    nav(`/${mediaType || media_type}/${id}?name=${title || name}`);
   };
   const setVoteClass = (vote) => {
     if (vote >= 8) {

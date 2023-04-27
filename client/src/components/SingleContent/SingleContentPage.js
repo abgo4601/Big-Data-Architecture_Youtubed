@@ -1,10 +1,11 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { img_300, unavailable, img_500 } from "../../images/Default";
 import SingleData from "../SingleData/SingleData";
 import "./SinglePage.css";
 import Myloader from "react-spinners/ClipLoader";
+import ScrollComments from "../ScrollComments/ScrollComments";
 
 import Carousel from "../Carousel/Carousel";
 
@@ -16,12 +17,13 @@ const SinglePage = () => {
   const [content, setContent] = useState();
   const [similarMovies, setSimilarMovies] = useState();
   const [isLoading, setIsLoading] = useState(false);
-  const [token, setToken] = useState();
+  const [comments, setComments] = useState();
   // eslint-disable-next-line
   const [color, setColor] = useState("grey");
   const { id, mediaType } = useParams();
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  console.log(id, mediaType);
+  const nameComment = searchParams.get("name") || "";
 
   const nav = useNavigate();
 
@@ -33,7 +35,6 @@ const SinglePage = () => {
         // eslint-disable-next-line
         setContent(data);
         setIsLoading(true);
-        console.log(data);
       } else {
         const AUTH_URL = "https://accounts.spotify.com/api/token";
         const response = await axios.post(
@@ -84,6 +85,14 @@ const SinglePage = () => {
         nav("/error");
       }
     }
+  };
+
+  const fetchComments = async (name) => {
+    const { data } = await axios.get(
+      `http://localhost:5000/apiv1/search/${name}`
+    );
+    setComments(data);
+    // console.log(data);
   };
 
   const fetchSimilarMovies = async () => {
@@ -153,16 +162,17 @@ const SinglePage = () => {
     }
   };
 
+  console.log(comments);
+
   useEffect(() => {
     window.scroll(0, 0);
 
     fetchData();
     fetchSimilarMovies();
-
+    fetchComments(nameComment);
     // eslint-disable-next-line
   }, [id, setContent]);
 
-  console.log(similarMovies);
   return (
     <>
       {isLoading ? (
@@ -321,6 +331,12 @@ const SinglePage = () => {
             <div>
               <Carousel mediaType={mediaType} id={id} />
             </div>
+          </div>
+          <div className='all__cast px-5 pt-5'>
+            <div className='cast__title'>
+              <h2>Reddit Comments</h2>
+            </div>
+            <div>{comments && <ScrollComments comments={comments} />}</div>
           </div>
           <div className='similar__shows'>
             <div className='btn__title'>
