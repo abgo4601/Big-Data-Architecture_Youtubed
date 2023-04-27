@@ -19,24 +19,24 @@ steps:
     args:
       - "run"
       - "deploy"
-      - "backend"
-      - "--image"
-      - "gcr.io/$PROJECT_ID/backend"
-      - "--port"
-      - "5000"
-      - '--region'
-      - 'us-central1'
-
-  # Deploy the backend image to Cloud Run separately
-  - name: "gcr.io/cloud-builders/gcloud"
-    args:
-      - "run"
-      - "deploy"
       - "frontend"
       - "--image"
       - "gcr.io/$PROJECT_ID/frontend"
       - "--port"
       - "3000"
+      - '--region'
+      - 'us-central1'
+      
+  # Deploy the backend image to Cloud Run separately
+  - name: "gcr.io/cloud-builders/gcloud"
+    args:
+      - "run"
+      - "deploy"
+      - "backend"
+      - "--image"
+      - "gcr.io/$PROJECT_ID/backend"
+      - "--port"
+      - "5000"
       - '--region'
       - 'us-central1' 
 
