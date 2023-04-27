@@ -41,24 +41,41 @@ steps:
   #     - 'us-central1' 
 
   # Deploy the images to Cloud Run
-  - name: "gcr.io/cloud-builders/gcloud"
+#  - name: "gcr.io/cloud-builders/gcloud"
+#    args:
+#      - "run"
+#      - "deploy"
+#      - "youtubed"
+#      - "--image"
+#      - "gcr.io/$PROJECT_ID/backend"
+#      - "--port"
+#      - "5000"
+#      - "--image"
+#      - "gcr.io/$PROJECT_ID/frontend"
+#      - "--port"
+#      - "3000"
+#      - "--platform"
+#      - "managed"
+#      - "--region"
+#      - "us-central1"
+#      - "--allow-unauthenticated"
+
+  - name: 'gcr.io/cloud-builders/gcloud'
     args:
-      - "run"
-      - "deploy"
-      - "youtubed"
-      - "--image"
-      - "gcr.io/$PROJECT_ID/backend"
-      - "--port"
-      - "5000"
-      - "--image"
-      - "gcr.io/$PROJECT_ID/frontend"
-      - "--port"
-      - "3000"
-      - "--platform"
-      - "managed"
-      - "--region"
-      - "us-central1"
-      - "--allow-unauthenticated"
+      - 'beta'
+      - 'container'
+      - 'clusters'
+      - 'my-cluster'
+      - 'get-credentials'
+      - '--zone'
+      - 'us-central1-a'
+      - '--project'
+      - '$PROJECT_ID'
+  - name: 'gcr.io/cloud-builders/kubectl'
+    args:
+      - 'apply'
+      - '-f'
+      - 'kubernetes/deployment.yaml'
 
 
 
