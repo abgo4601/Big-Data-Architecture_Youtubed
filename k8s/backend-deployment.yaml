@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-deployment
+spec:
+  selector:
+    matchLabels:
+      component: backend
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        component: backend
+    spec:
+      containers:
+      - name: backend
+        image: gcr.io/$PROJECT_ID/backend
+        ports:
+        - containerPort: 5000
