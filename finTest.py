@@ -1,16 +1,23 @@
-from flask import Flask, redirect, request, session, url_for, jsonify
+from flask import Flask,jsonify
+import json
+import requests
+from flask.globals import request, session
+from flask.wrappers import Response
 from google.oauth2 import id_token
-from google.auth.transport import requests
-from functools import wraps
+from werkzeug.utils import redirect
 from dotenv import load_dotenv
 from flask_cors import CORS
-import os,pathlib
+import os
 from google_auth_oauthlib.flow import Flow
-from googleapiclient.discovery import build
-from pip._vendor import cachecontrol
-import google
+from flask_pymongo import PyMongo
+from user import User
+from werkzeug.exceptions import abort
+import jwt
 from themoviedb import TMDb
 import openai
+import google
+from pip._vendor import cachecontrol
+from googleapiclient.discovery import build
 
 app = Flask(__name__)
 load_dotenv()
@@ -18,11 +25,9 @@ CORS(app)
 app.config['Access-Control-Allow-Origin'] = '*'
 app.config["Access-Control-Allow-Headers"]="Content-Type"
 
-tmdbkey=os.getenv("TMDB_KEY")
-spotify_id=os.getenv("SPOTIFY_CLIENT_ID")
-spotify_secret=os.getenv("SPOTIFY_CLIENT_SECRET")
-
-tmdb = TMDb(key=tmdbkey, language="en-US")
+app.config['MONGO_DBNAME'] = "youtubed"
+app.config['MONGO_URI'] = os.getenv("CLUSTER_URL")
+mongo = PyMongo(app)
 
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 app.secret_key = os.getenv("SECRET_KEY")
@@ -39,19 +44,29 @@ CLIENT_CONFIG = {'web': {
     'javascript_origins': os.getenv("GOOGLE_JAVASCRIPT_ORIGINS")
 }}
 
-def login_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if 'google_id' not in session:
-            return redirect(url_for('login', next=request.url))
-        return f(*args, **kwargs)
-    return decorated_function
+BACKEND_URL=os.getenv("BACKEND_URL")
+FRONTEND_URL=os.getenv("FRONTEND_URL")
+algorithm = os.getenv("ALGORITHM")
 
-@app.route('/login')
-def login():
-    next_url = request.args.get('next') or url_for('home')
-    session['next_url'] = next_url
-    return redirect(url_for('google_login'))
+tmdbkey=os.getenv("TMDB_KEY")
+spotify_id=os.getenv("SPOTIFY_CLIENT_ID")
+spotify_secret=os.getenv("SPOTIFY_CLIENT_SECRET")
+
+tmdb = TMDb(key=tmdbkey, language="en-US")
+
+def login_required(function):
+    def wrapper(*args, **kwargs):
+        encoded_jwt=request.headers.get("Authorization").split("Bearer ")[1]
+        if encoded_jwt==None:
+            return abort(401)
+        else:
+            return function()
+    return wrapper
+
+def Generate_JWT(payload):
+    encoded_jwt = jwt.encode(payload, app.secret_key, algorithm=algorithm)
+    return encoded_jwt
+
 
 flow = Flow.from_client_config(
     CLIENT_CONFIG,
@@ -68,7 +83,7 @@ def get_recommendations(tags):
     openai.api_key = os.getenv("OPENAI_API_KEY")
 
     model_engine = "text-davinci-003"
-    prompt = f"Recommend me names of top 15 TV shows, movies that are listed on IMDB and songs listed on Spotify based on the following tags: {tags}."
+    prompt = f"Recommend me names of top 15 TV shows, movies that are listed on IMDB and songs listed on Spotify based on the following tags: {tags}. Return the response in json format with keys as shows, movies, songs"
 
     response = openai.Completion.create(
         engine=model_engine,
@@ -109,10 +124,10 @@ def fetch_song_details(collection):
         json_response = response.json()
         if(json_response['tracks']['items']):
             out.append({
-                "poster_path": json_response['tracks']['items'][0]['album']['images'][1]['url'],
-                "title": json_response['tracks']['items'][0]['name'],
-                "id": json_response['tracks']['items'][0]['id'],
-                "artist": json_response['tracks']['items'][0]['artists'][0]['name'],
+                "poster_path": str(json_response['tracks']['items'][0]['album']['images'][1]['url']),
+                "title": str(json_response['tracks']['items'][0]['name']),
+                "id": str(json_response['tracks']['items'][0]['id']),
+                "artist": str(json_response['tracks']['items'][0]['artists'][0]['name']),
                 "release_date": json_response['tracks']['items'][0]['album']['release_date'],
                 "vote_average": int(json_response['tracks']['items'][0]['popularity'])/10,
                 "mediaType": "Song"
@@ -126,11 +141,11 @@ def fetch_movie_details(collection):
         if len(results)>0:
             top_result=results[0]
             out.append({
-                "poster_path": {top_result.poster_path},
-                "title": top_result.original_title,
-                "id": top_result.id,
-                "vote_average": top_result.vote_average,
-                "release_date": top_result.release_date.strftime('%Y-%m-%d'),
+                "poster_path": str(top_result.poster_path),
+                "title": str(top_result.original_title),
+                "id": int(top_result.id),
+                "vote_average": float(top_result.vote_average),
+                "release_date": top_result.release_date.strftime('%Y-%m-%d') or "2023-01-01",
                 "mediaType": "Movie"
             })
     return out
@@ -142,12 +157,12 @@ def fetch_show_details(collection):
         if len(results)>0:
             top_result=results[0]
             out.append({
-                "poster_path": {top_result.poster_path},
-                "title": top_result.name,
-                "id": top_result.id,
-                "vote_average": top_result.vote_average,
-                "release_date": top_result.first_air_date.strftime('%Y-%m-%d'),
-                "mediaType": "Show"
+                "poster_path": str(top_result.poster_path),
+                "title": str(top_result.name),
+                "id": int(top_result.id),
+                "vote_average": float(top_result.vote_average),
+                "release_date": top_result.first_air_date.strftime('%Y-%m-%d') or "2023-01-01",
+                "mediaType": "tv"
                 })
     return out
 
@@ -156,22 +171,14 @@ def parse_recommendations(recommendations):
     movies=[]
     songs=[]
 
-    # Split the text response into separate sections for each category
     sections = recommendations.split("\n\n")
+    json_data = json.loads(sections[1])
+    print(json_data)
+    lowercase_json={key.lower(): value for key,value in json_data.items()}
 
-    for section in sections:
-        if "TV Shows:" in section:
-            for line in section.split("\n")[1:]:
-                if line:
-                    shows.append(line.split(". ")[1].split(" (")[0])
-        elif "Movies:" in section:
-            for line in section.split("\n")[1:]:
-                if line:
-                    movies.append(line.split(". ")[1].split(" (")[0])
-        elif "Songs:" in section:
-            for line in section.split("\n")[1:]:
-                if line:
-                    songs.append(line.split(". ")[1])
+    shows=lowercase_json["shows"]
+    movies=lowercase_json["movies"]
+    songs=lowercase_json["songs"]
 
     if not movies:
         movies=['The Shawshank Redemption', 'The Dark Knight', 'The Godfather', 'Inception', "Schindler's List", 'The Lord of the Rings', 'Fight Club', 'Forrest Gump', 'The Matrix', 'Star Wars', 'Good Will Hunting', 'Pulp Fiction', 'The Silence of the Lambs', 'The Green Mile', 'Gladiator']
@@ -188,23 +195,34 @@ def parse_recommendations(recommendations):
 
     return [movie_details,show_details,song_details]
 
-@app.route('/google-login')
-def google_login():
+@app.route("/auth/google")
+def login():
     authorization_url, state = flow.authorization_url()
-    return redirect(authorization_url)
+    # Store the state so the callback can verify the auth server response.
+    session["state"] = state
+    return Response(
+        response=json.dumps({'auth_url':authorization_url}),
+        status=200,
+        mimetype='application/json'
+    )
 
-res=[]
 
 @app.route('/callback')
 def callback():
     flow.fetch_token(authorization_response=request.url)
     credentials = flow.credentials
-    id_info = id_token.verify_oauth2_token(
-        credentials._id_token, requests.Request(),audience=GOOGLE_CLIENT_ID,clock_skew_in_seconds=10
-    )
-    session['google_id'] = id_info['sub']
-    next_url = session.pop('next_url', '/home')
+    request_session = requests.session()
+    cached_session = cachecontrol.CacheControl(request_session)
+    token_request = google.auth.transport.requests.Request(session=cached_session)
 
+    id_info = id_token.verify_oauth2_token(
+        id_token=credentials._id_token, request=token_request,
+        audience=GOOGLE_CLIENT_ID,clock_skew_in_seconds=10
+    )
+    session["google_id"] = id_info.get("sub")
+
+    del id_info['aud']
+    jwt_token=Generate_JWT(id_info)
     youtube = build('youtube', 'v3', credentials=credentials)
 
     results = youtube.videos().list(
@@ -219,16 +237,39 @@ def callback():
             for t in item["snippet"]["tags"]:
                 if t not in video_tags:
                     video_tags.append(t)
-
+    
     recommendations = get_recommendations(video_tags)
     res=parse_recommendations(recommendations)
 
-    return redirect(next_url)
+    users = mongo.db.users
+    existing_user = users.find_one({'email': id_info.get('email')}, {'_id': 0})
+    if existing_user is None:
+        new_user = User(id_info.get('name'),id_info.get('email'),res[0],res[1],res[2])
+        user_data_to_save = new_user.dict()
+        users.insert_one(user_data_to_save)
 
-@app.route('/home')
+    return redirect(f"{FRONTEND_URL}/home?token={jwt_token}")
+
+@app.route("/recommendations")
 @login_required
-def home():
-    return jsonify(res)
+def user_recommendations():
+    encoded_jwt=request.headers.get("Authorization").split("Bearer ")[1]
+    try:
+        decoded_jwt=jwt.decode(encoded_jwt, app.secret_key, algorithms=[algorithm,])
+    except Exception as e: 
+        return Response(
+            response=json.dumps({"message":"Decoding JWT Failed", "exception":e.args}),
+            status=500,
+            mimetype='application/json'
+        )
+    user=mongo.db.users.find_one({"email": decoded_jwt.get('email')},{"showRecos": 1,"movieRecos": 1,"songRecos": 1})
+
+    return Response(
+        response = json.dumps({"shows": user.get("showRecos", []),"movies": user.get("movieRecos", []),"songs": user.get("songRecos", [])}),
+        status=200,
+         mimetype='application/json'
+    )
+
 
 if __name__ == "__main__":
     app.run(debug=True, port=5000, host="0.0.0.0")

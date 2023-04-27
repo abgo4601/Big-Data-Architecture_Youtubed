@@ -87,7 +87,7 @@ def get_recommendations(tags):
     openai.api_key = os.getenv("OPENAI_API_KEY")
 
     model_engine = "text-davinci-003"
-    prompt = f"Recommend me names of top 15 TV shows, movies that are listed on IMDB and songs listed on Spotify based on the following tags: {tags}."
+    prompt = f"Recommend me names of top 15 TV shows, movies that are listed on IMDB and songs listed on Spotify based on the following tags: {tags}. Return the response in json format with having keys as shows, movies, songs"
 
     response = openai.Completion.create(
         engine=model_engine,
@@ -134,7 +134,7 @@ def fetch_song_details(collection):
                 "id": json_response['tracks']['items'][0]['id'],
                 "artist": json_response['tracks']['items'][0]['artists'][0]['name'],
                 "release_date": json_response['tracks']['items'][0]['album']['release_date'],
-                "vote_average": int(json_response['tracks']['items'][0]['popularity']) / 10,
+                "vote_average": int(json_response['tracks']['items'][0]['popularity'])/10,
                 "mediaType": "Song"
             })
     return out
@@ -170,18 +170,24 @@ def fetch_show_details(collection):
                 "vote_average": top_result.vote_average,
                 "release_date": top_result.first_air_date.strftime('%Y-%m-%d'),
                 "mediaType": "Show"
-            })
+                })
     return out
 
-
 def parse_recommendations(recommendations):
-    shows = []
-    movies = []
-    songs = []
+    shows=[]
+    movies=[]
+    songs=[]
 
     # Split the text response into separate sections for each category
     sections = recommendations.split("\n\n")
 
+    json_data = json.loads(sections[1])
+
+    shows = json_data["shows"]
+    movies = json_data["movies"]
+    songs = json_data["songs"]
+    """
+    Remove this code if the above is working fine
     for section in sections:
         if "TV Shows:" in section:
             for line in section.split("\n")[1:]:
@@ -195,6 +201,7 @@ def parse_recommendations(recommendations):
             for line in section.split("\n")[1:]:
                 if line:
                     songs.append(line.split(". ")[1])
+    """
 
     # uncomment for debugging purpose for testing response
     # print('TV Shows:', shows)
@@ -202,25 +209,19 @@ def parse_recommendations(recommendations):
     # print('Songs:', songs)
 
     if not movies:
-        movies = ['The Shawshank Redemption', 'The Dark Knight', 'The Godfather', 'Inception', "Schindler's List",
-                  'The Lord of the Rings', 'Fight Club', 'Forrest Gump', 'The Matrix', 'Star Wars', 'Good Will Hunting',
-                  'Pulp Fiction', 'The Silence of the Lambs', 'The Green Mile', 'Gladiator']
+        movies=['The Shawshank Redemption', 'The Dark Knight', 'The Godfather', 'Inception', "Schindler's List", 'The Lord of the Rings', 'Fight Club', 'Forrest Gump', 'The Matrix', 'Star Wars', 'Good Will Hunting', 'Pulp Fiction', 'The Silence of the Lambs', 'The Green Mile', 'Gladiator']
 
     if not shows:
-        shows = ['The Big Bang Theory', 'Stranger Things', 'Game of Thrones', 'Rick and Morty', 'Breaking Bad',
-                 'Friends', 'The Walking Dead', 'The Crown', 'Westworld', 'The Office', 'Doctor Who', "Grey's Anatomy",
-                 "The Handmaid's Tale", 'Black Mirror', 'This Is Us']
+        shows=['The Big Bang Theory', 'Stranger Things', 'Game of Thrones', 'Rick and Morty', 'Breaking Bad', 'Friends', 'The Walking Dead', 'The Crown', 'Westworld', 'The Office', 'Doctor Who', "Grey's Anatomy", "The Handmaid's Tale", 'Black Mirror', 'This Is Us']
 
     if not songs:
-        songs = ['Bohemian Rhapsody', 'Stairway to Heaven', 'Hotel California', 'Sweet Child O Mine', 'Imagine',
-                 'Like a Rolling Stone', 'Hey Jude', 'Purple Haze', 'Smells Like Teen Spirit', 'Born to Run']
+        songs=['Bohemian Rhapsody', 'Stairway to Heaven', 'Hotel California', 'Sweet Child O Mine', 'Imagine', 'Like a Rolling Stone', 'Hey Jude', 'Purple Haze', 'Smells Like Teen Spirit', 'Born to Run']
 
-    song_details = fetch_song_details(songs)
-    movie_details = fetch_movie_details(movies)
-    show_details = fetch_show_details(shows)
+    song_details=fetch_song_details(songs)
+    movie_details=fetch_movie_details(movies)
+    show_details=fetch_show_details(shows)
 
-    return [movie_details, show_details, song_details]
-
+    return [movie_details,show_details,song_details]
 
 @app.route("/callback")
 def callback():
@@ -232,13 +233,13 @@ def callback():
 
     id_info = id_token.verify_oauth2_token(
         id_token=credentials._id_token, request=token_request,
-        audience=GOOGLE_CLIENT_ID, clock_skew_in_seconds=10
+        audience=GOOGLE_CLIENT_ID,clock_skew_in_seconds=10
     )
     session["google_id"] = id_info.get("sub")
-
+    
     # removing the specific audience, as it is throwing error
     del id_info['aud']
-    jwt_token = Generate_JWT(id_info)
+    jwt_token=Generate_JWT(id_info)
     youtube = build('youtube', 'v3', credentials=credentials)
 
     results = youtube.videos().list(
@@ -290,17 +291,16 @@ def logout():
         mimetype='application/json'
     )
 
-
 @app.route("/home")
 @login_required
 def home_page_user():
-    encoded_jwt = request.headers.get("Authorization").split("Bearer ")[1]
+    encoded_jwt=request.headers.get("Authorization").split("Bearer ")[1]
     try:
-        decoded_jwt = jwt.decode(encoded_jwt, app.secret_key, algorithms=[algorithm, ])
+        decoded_jwt=jwt.decode(encoded_jwt, app.secret_key, algorithms=[algorithm,])
         print(decoded_jwt)
-    except Exception as e:
+    except Exception as e: 
         return Response(
-            response=json.dumps({"message": "Decoding JWT Failed", "exception": e.args}),
+            response=json.dumps({"message":"Decoding JWT Failed", "exception":e.args}),
             status=500,
             mimetype='application/json'
         )
@@ -310,7 +310,6 @@ def home_page_user():
         mimetype='application/json'
     )
 
-
 @app.route("/user/recommendations")
 def user_recommendations():
     username = request.args.get('username')
@@ -318,8 +317,7 @@ def user_recommendations():
     recs_list = get_user_recs(username)
 
     return Response(
-        response=json.dumps(
-            {"movies": recs_list["movieRecos"], "shows": recs_list["tvshowRecos"], "songs": recs_list["musicRecos"]}),
+        response = json.dumps({"movies": recs_list["movieRecos"], "shows":recs_list["tvshowRecos"],"songs": recs_list["musicRecos"]}),
         status=200,
         mimetype='application/json'
 
