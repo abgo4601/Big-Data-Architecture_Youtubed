@@ -5,8 +5,8 @@ steps:
   - name: "gcr.io/cloud-builders/docker"
     args: ["build", "-t", "gcr.io/$PROJECT_ID/backend", "./server"]
 
-  # - name: "gcr.io/cloud-builders/docker"
-  #   args: ["build", "-t", "gcr.io/$PROJECT_ID/nginx", "--build-arg", "nginx_proxy_conf=./nginx.conf", "."]
+  - name: "gcr.io/cloud-builders/docker"
+    args: ["build", "-t", "gcr.io/$PROJECT_ID/nginx", "--build-arg", "nginx_proxy_conf=./nginx.conf", "."]
 
   - name: "gcr.io/cloud-builders/docker"
     args: ["push", "gcr.io/$PROJECT_ID/frontend"]
@@ -15,30 +15,30 @@ steps:
     args: ["push", "gcr.io/$PROJECT_ID/backend"]
 
   # Deploy the images to Cloud Run
-  - name: "gcr.io/cloud-builders/gcloud"
-    args:
-      - "run"
-      - "deploy"
-      - "youtubed"
-      - "--image"
-      - "gcr.io/$PROJECT_ID/backend"
-      - "--image"
-      - "gcr.io/$PROJECT_ID/frontend"
-      - "--port"
-      - "5000"
-      - "--port"
-      - "3000"
-      - "--platform"
-      - "managed"
-      - "--region"
-      - "us-central1"
-      - "--allow-unauthenticated"
-
-  # - name: "gcr.io/cloud-builders/docker"
-  #   args: ["push", "gcr.io/$PROJECT_ID/nginx"]
-
   # - name: "gcr.io/cloud-builders/gcloud"
-  #   args: ["run", "deploy", "youtubed", "--image", "gcr.io/$PROJECT_ID/nginx", "--region", "us-central1", "--platform", "managed", "--allow-unauthenticated"]
+  #   args:
+  #     - "run"
+  #     - "deploy"
+  #     - "youtubed"
+  #     - "--image"
+  #     - "gcr.io/$PROJECT_ID/backend"
+  #     - "--image"
+  #     - "gcr.io/$PROJECT_ID/frontend"
+  #     - "--port"
+  #     - "5000"
+  #     - "--port"
+  #     - "3000"
+  #     - "--platform"
+  #     - "managed"
+  #     - "--region"
+  #     - "us-central1"
+  #     - "--allow-unauthenticated"
+
+  - name: "gcr.io/cloud-builders/docker"
+    args: ["push", "gcr.io/$PROJECT_ID/nginx"]
+
+  - name: "gcr.io/cloud-builders/gcloud"
+    args: ["run", "deploy", "youtubed", "--image", "gcr.io/$PROJECT_ID/nginx", "--region", "us-central1", "--platform", "managed", "--allow-unauthenticated"]
 options:
   logging: CLOUD_LOGGING_ONLY
 
