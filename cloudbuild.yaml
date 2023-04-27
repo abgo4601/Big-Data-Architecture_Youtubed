@@ -32,6 +32,8 @@ steps:
       - "managed"
       - "--region"
       - "us-central1"
+      - "--allow-unauthenticated"
+
   # - name: "gcr.io/cloud-builders/docker"
   #   args: ["push", "gcr.io/$PROJECT_ID/nginx"]
 
