@@ -22,7 +22,6 @@ steps:
       - "youtubed"
       - "--image"
       - "gcr.io/$PROJECT_ID/backend"
-      - "--image"
       - "--port"
       - "5000"
       - "gcr.io/$PROJECT_ID/frontend"
