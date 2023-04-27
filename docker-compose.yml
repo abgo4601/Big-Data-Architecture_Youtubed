@@ -1,7 +1,7 @@
 version: '3'
 
 services:
-  server:
+  backend:
     build: server
     command: ["flask", "run", "--host=0.0.0.0"]
     volumes:
@@ -12,7 +12,7 @@ services:
     ports:
       - "5000:5000"
 
-  client:
+  frontend:
     build: client
     command: ["npm", "start"]
     volumes:

@@ -1,9 +1,9 @@
 steps:
   - name: "gcr.io/cloud-builders/docker"
-    args: ["build", "-t", "gcr.io/$PROJECT_ID/client", "./client:/frontend"]
+    args: ["build", "-t", "gcr.io/$PROJECT_ID/frontend", "./frontend"]
 
   - name: "gcr.io/cloud-builders/docker"
-    args: ["build", "-t", "gcr.io/$PROJECT_ID/server", "./server:/backend"]
+    args: ["build", "-t", "gcr.io/$PROJECT_ID/backend", "./backend"]
 
   - name: "gcr.io/cloud-builders/docker"
     args: ["build", "-t", "gcr.io/$PROJECT_ID/nginx", "--build-arg", "nginx_proxy_conf=./nginx.conf", "."]
