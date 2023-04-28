@@ -17,3 +17,6 @@ spec:
         image: gcr.io/big-data-arch-youtubed/frontend
         ports:
         - containerPort: 3000
+        env:
+        - name: NODE_ENV
+          value: development
