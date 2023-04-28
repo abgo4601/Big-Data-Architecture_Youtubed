@@ -43,21 +43,11 @@ spec:
             configMapKeyRef:
               name: my-config
               key: OPENAI_API_KEY
-        - name: OPENAI_API_KEY
-          valueFrom:
-            configMapKeyRef:
-              name: my-config
-              key: OPENAI_API_KEY
         - name: TMDB_KEY
           valueFrom:
             configMapKeyRef:
               name: my-config
               key: TMDB_KEY
-          - name: SPOTIFY_CLIENT_ID
-          valueFrom:
-            configMapKeyRef:
-              name: my-config
-              key: SPOTIFY_CLIENT_ID
           - name: SPOTIFY_CLIENT_ID
           valueFrom:
             configMapKeyRef:
