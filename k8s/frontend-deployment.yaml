@@ -14,6 +14,6 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: gcr.io/$PROJECT_ID/frontend
+        image: gcr.io/big-data-arch-youtubed/frontend
         ports:
         - containerPort: 3000
