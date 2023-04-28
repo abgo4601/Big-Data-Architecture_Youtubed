@@ -88,6 +88,8 @@ spec:
                 configMapKeyRef:
                   name: my-config
                   key: FRONTEND_URL
+            - name: FLASK_APP
+              value: finTest.py
           volumeMounts:
             - name: config-volume
               mountPath: /etc/config
