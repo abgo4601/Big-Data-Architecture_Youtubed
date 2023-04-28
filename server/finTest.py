@@ -5,7 +5,7 @@ from flask.globals import request, session
 from flask.wrappers import Response
 from google.oauth2 import id_token
 from werkzeug.utils import redirect
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 from flask_cors import CORS
 import os
 from google_auth_oauthlib.flow import Flow
@@ -20,37 +20,37 @@ from pip._vendor import cachecontrol
 from googleapiclient.discovery import build
 
 app = Flask(__name__)
-load_dotenv()
+# load_dotenv()
 CORS(app)
 app.config['Access-Control-Allow-Origin'] = '*'
 app.config["Access-Control-Allow-Headers"]="Content-Type"
 
 app.config['MONGO_DBNAME'] = "youtubed"
-app.config['MONGO_URI'] = os.getenv("CLUSTER_URL")
+app.config['MONGO_URI'] = os.environ.get("CLUSTER_URL")
 mongo = PyMongo(app)
 
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
-app.secret_key = os.getenv("SECRET_KEY")
-GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
-BACKEND_URL=os.getenv("BACKEND_URL")
+app.secret_key = os.environ.get("SECRET_KEY")
+GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID")
+BACKEND_URL=os.environ.get("BACKEND_URL")
 CLIENT_CONFIG = {'web': {
-    'client_id': os.getenv("GOOGLE_CLIENT_ID"),
-    'project_id': os.getenv("GOOGLE_PROJECT_ID"),
+    'client_id': os.environ.get("GOOGLE_CLIENT_ID"),
+    'project_id': os.environ.get("GOOGLE_PROJECT_ID"),
     'auth_uri': 'https://accounts.google.com/o/oauth2/auth',
     'token_uri': 'https://www.googleapis.com/oauth2/v3/token',
     'auth_provider_x509_cert_url': 'https://www.googleapis.com/oauth2/v1/certs',
-    'client_secret': os.getenv("GOOGLE_CLIENT_SECRET"),
-    'redirect_uris': os.getenv("GOOGLE_REDIRECT_URIS"),
-    'javascript_origins': os.getenv("GOOGLE_JAVASCRIPT_ORIGINS")
+    'client_secret': os.environ.get("GOOGLE_CLIENT_SECRET"),
+    'redirect_uris': os.environ.get("GOOGLE_REDIRECT_URIS"),
+    'javascript_origins': os.environ.get("GOOGLE_JAVASCRIPT_ORIGINS")
 }}
 
-BACKEND_URL=os.getenv("BACKEND_URL")
-FRONTEND_URL=os.getenv("FRONTEND_URL")
-algorithm = os.getenv("ALGORITHM")
+BACKEND_URL=os.environ.get("BACKEND_URL")
+FRONTEND_URL=os.environ.get("FRONTEND_URL")
+algorithm = os.environ.get("ALGORITHM")
 
-tmdbkey=os.getenv("TMDB_KEY")
-spotify_id=os.getenv("SPOTIFY_CLIENT_ID")
-spotify_secret=os.getenv("SPOTIFY_CLIENT_SECRET")
+tmdbkey=os.environ.get("TMDB_KEY")
+spotify_id=os.environ.get("SPOTIFY_CLIENT_ID")
+spotify_secret=os.environ.get("SPOTIFY_CLIENT_SECRET")
 
 tmdb = TMDb(key=tmdbkey, language="en-US")
 
@@ -80,7 +80,7 @@ flow = Flow.from_client_config(
 )
 
 def get_recommendations(tags):
-    openai.api_key = os.getenv("OPENAI_API_KEY")
+    openai.api_key = os.environ.get("OPENAI_API_KEY")
 
     model_engine = "text-davinci-003"
     prompt = f"Recommend me names of top 15 TV shows, movies that are listed on IMDB and songs listed on Spotify based on the following tags: {tags}. Return the response in json format with keys as shows, movies, songs"
