@@ -6,7 +6,6 @@ services:
     command: ["flask", "run", "--host=0.0.0.0"]
     volumes:
       - ./server:/backend
-    env_file: ./server/.env
     environment:
 #      - FLASK_ENV=development
       - FLASK_APP=finTest.py
