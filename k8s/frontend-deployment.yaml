@@ -25,9 +25,9 @@ spec:
               key: BACKEND_URL
         - name: NODE_ENV
           value: development
-          volumeMounts:
-            - name: config-volume
-              mountPath: /etc/config
+        volumeMounts:
+          - name: config-volume
+            mountPath: /etc/config
       volumes:
         - name: config-volume
           configMap:
