@@ -18,5 +18,17 @@ spec:
         ports:
         - containerPort: 3000
         env:
+        - name: BACKEND_URL
+          valueFrom:
+            configMapKeyRef:
+              name: my-config
+              key: BACKEND_URL
         - name: NODE_ENV
           value: development
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/config
+      volumes:
+        - name: config-volume
+          configMap:
+            name: my-config
