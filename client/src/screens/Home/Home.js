@@ -7,7 +7,7 @@ import SingleData from "../../components/SingleData/SingleData";
 import "./Home.css";
 import { useNavigate } from "react-router-dom";
 
-export const BACKEND_URL = process.env.BACKEND_URL;
+export const BACKEND_URL = 'http://34.134.102.218';
 const TMDB_KEY = "dfe8923f3e487ce951bd22dcd3dfccfc";
 
 const Home = () => {

@@ -3,7 +3,7 @@ import Google from "../../images/google.svg";
 import "./SignIn.css";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-export const BACKEND_URL = process.env.BACKEND_URL;
+export const BACKEND_URL = 'http://34.134.102.218';
 
 const SignIn = () => {
   const nav = useNavigate();
