@@ -9,3 +9,4 @@ spec:
   - protocol: TCP
     port: 3000
   type: LoadBalancer
+  loadBalancerIP: 34.72.233.49
