@@ -2,7 +2,8 @@ version: '3'
 
 services:
   backend:
-    build: server
+#    build: server
+    image: gcr.io/big-data-arch-youtubed/backend
 #    command: ["flask", "run", "--host=0.0.0.0"]
     volumes:
       - ./server:/backend
@@ -13,7 +14,8 @@ services:
       - "5000:5000"
 
   frontend:
-    build: client
+#    build: client
+    image: gcr.io/big-data-arch-youtubed/frontend
 #    command: ["npm", "start"]
     volumes:
       - ./client:/frontend
