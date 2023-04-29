@@ -76,7 +76,7 @@ flow = Flow.from_client_config(
         "openid",
         'https://www.googleapis.com/auth/youtube.readonly'
     ],
-    redirect_uri="http://34.172.154.102:5000/callback",
+    redirect_uri="http://34.134.102.218:5000/callback",
 )
 
 def get_recommendations(tags):

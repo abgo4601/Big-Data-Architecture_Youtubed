@@ -9,3 +9,4 @@ spec:
   - protocol: TCP
     port: 5000
   type: LoadBalancer
+  loadBalancerIP: 34.134.102.218
