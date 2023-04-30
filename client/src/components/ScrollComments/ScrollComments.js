@@ -27,7 +27,6 @@ const CommentAnimation = ({ comments }) => {
       {visibleComments.map((comment, index) => (
         <div key={index} className='comment'>
           <p>{comment.comment}</p>
-          <p>{comment.timestamp}</p>
         </div>
       ))}
     </div>

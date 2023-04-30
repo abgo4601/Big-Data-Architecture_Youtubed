@@ -7,6 +7,8 @@ import "./Carousel.css";
 const handleDragStart = (e) => e.preventDefault();
 
 const TMDB_KEY = "dfe8923f3e487ce951bd22dcd3dfccfc";
+const SPOTIFY_CLIENT_ID = "580c268cc1c142abb5e4697ca23b19a4";
+const SPOTIFY_CLIENT_SECRET = "8bc9e2a2a2794c909fcbf4db3e1280b4";
 
 const Gallery = ({ mediaType, id }) => {
   const [credits, setCredits] = useState();
@@ -41,12 +43,21 @@ const Gallery = ({ mediaType, id }) => {
   const items = credits?.map((n) => {
     return (
       <div className='carousel__d'>
-        <img
-          src={n.profile_path ? `${img_300}/${n.profile_path}` : noPicture}
-          alt=''
-          className='caro_img'
-          onDragStart={handleDragStart}
-        />
+        {mediaType !== "Song" ? (
+          <img
+            src={n.profile_path ? `${img_300}/${n.profile_path}` : noPicture}
+            alt=''
+            className='caro_img'
+            onDragStart={handleDragStart}
+          />
+        ) : (
+          <img
+            src={n.profile_path ? n.profile_path : noPicture}
+            alt=''
+            className='caro_img'
+            onDragStart={handleDragStart}
+          />
+        )}
         <div className='caro__details'>
           <h6 className='cast__name'>{n.original_name}</h6>
           <h6 className='character'>{n.character}</h6>
@@ -57,17 +68,67 @@ const Gallery = ({ mediaType, id }) => {
 
   const fetchCredits = async () => {
     try {
-      const { data } = await axios.get(` 
+      if (mediaType != "Song") {
+        const { data } = await axios.get(` 
      https://api.themoviedb.org/3/${mediaType}/${id}/credits?api_key=${TMDB_KEY}`);
-      const dataSlice = data.cast;
-      setCredits(dataSlice);
+        const dataSlice = data.cast;
+        setCredits(dataSlice);
+      } else {
+        const AUTH_URL = "https://accounts.spotify.com/api/token";
+        const response = await axios.post(
+          AUTH_URL,
+          {
+            grant_type: "client_credentials",
+            client_id: SPOTIFY_CLIENT_ID,
+            client_secret: SPOTIFY_CLIENT_SECRET,
+          },
+          {
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+            },
+          }
+        );
+        const access_token = response.data.access_token;
+
+        const { data } = await axios.get(
+          `https://api.spotify.com/v1/tracks/${id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${access_token}`,
+              "Content-Type": "appliation/json",
+            },
+          }
+        );
+
+        const { data: res } = await axios.get(
+          `https://api.spotify.com/v1/artists/${data.artists[0].id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${access_token}`,
+              "Content-Type": "appliation/json",
+            },
+          }
+        );
+
+        const required = [
+          {
+            profile_path: res.images[0].url,
+            original_name: res.name,
+            character: "artist",
+          },
+        ];
+
+        setCredits(required);
+      }
     } catch (error) {
       console.error(error);
     }
   };
   useEffect(() => {
     fetchCredits();
-  }, [credits]);
+  }, []);
+
+  console.log(credits);
 
   return (
     <AliceCarousel

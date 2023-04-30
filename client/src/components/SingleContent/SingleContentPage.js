@@ -328,9 +328,7 @@ const SinglePage = () => {
             <div className='cast__title'>
               <h2>Cast</h2>
             </div>
-            <div>
-              <Carousel mediaType={mediaType} id={id} />
-            </div>
+            <div>{content && <Carousel mediaType={mediaType} id={id} />}</div>
           </div>
           <div className='all__cast px-5 pt-5'>
             <div className='cast__title'>
