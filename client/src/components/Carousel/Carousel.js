@@ -128,8 +128,6 @@ const Gallery = ({ mediaType, id }) => {
     fetchCredits();
   }, []);
 
-  console.log(credits);
-
   return (
     <AliceCarousel
       infinite

@@ -162,7 +162,7 @@ const SinglePage = () => {
     }
   };
 
-  console.log(comments);
+  console.log(similarMovies);
 
   useEffect(() => {
     window.scroll(0, 0);
@@ -171,7 +171,7 @@ const SinglePage = () => {
     fetchSimilarMovies();
     fetchComments(nameComment);
     // eslint-disable-next-line
-  }, [id, setContent]);
+  }, [id, setContent, nameComment]);
 
   return (
     <>
@@ -342,7 +342,9 @@ const SinglePage = () => {
             </div>
             <div className='similar'>
               {similarMovies &&
-                similarMovies.map((n) => <SingleData key={n.id} {...n} />)}
+                similarMovies.map((n) => (
+                  <SingleData key={n.id} {...n} mediaType={mediaType} />
+                ))}
             </div>
           </div>
         </>
