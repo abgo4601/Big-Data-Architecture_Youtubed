@@ -6,6 +6,7 @@ import SingleData from "../SingleData/SingleData";
 import "./SinglePage.css";
 import Myloader from "react-spinners/ClipLoader";
 import ScrollComments from "../ScrollComments/ScrollComments";
+import GoogleTrends from "../Trends/Trends";
 
 import Carousel from "../Carousel/Carousel";
 
@@ -22,6 +23,7 @@ const SinglePage = () => {
   const [color, setColor] = useState("grey");
   const { id, mediaType } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
+  const [showTrends, setShowTrends] = useState(false);
 
   const nameComment = searchParams.get("name") || "";
 
@@ -162,16 +164,15 @@ const SinglePage = () => {
     }
   };
 
-  console.log(similarMovies);
-
   useEffect(() => {
     window.scroll(0, 0);
 
     fetchData();
     fetchSimilarMovies();
     fetchComments(nameComment);
+    setShowTrends(true);
     // eslint-disable-next-line
-  }, [id, setContent, nameComment]);
+  }, [id, setContent, nameComment, showTrends]);
 
   return (
     <>
@@ -335,6 +336,30 @@ const SinglePage = () => {
               <h2>Reddit Comments</h2>
             </div>
             <div>{comments && <ScrollComments comments={comments} />}</div>
+          </div>
+
+          <div className='all__cast px-5 pt-5'>
+            <div className='cast__title'>
+              <h2>Search Trends</h2>
+            </div>
+            <div>
+              {showTrends && (
+                <React.Fragment>
+                  <GoogleTrends
+                    className='widgetStyle'
+                    type='GEO_MAP'
+                    keyword={nameComment}
+                    url='https://ssl.gstatic.com/trends_nrtr/2051_RC11/embed_loader.js'
+                  />
+                  <GoogleTrends
+                    className='widgetStyle'
+                    type='TIMESERIES'
+                    keyword={nameComment}
+                    url='https://ssl.gstatic.com/trends_nrtr/2051_RC11/embed_loader.js'
+                  />
+                </React.Fragment>
+              )}
+            </div>
           </div>
           <div className='similar__shows'>
             <div className='btn__title'>

@@ -25,8 +25,6 @@ const CommentAnimation = ({ comments }) => {
     return () => clearInterval(interval); // Clean up the interval on component unmount
   }, [comments, currentIndex]);
 
-  console.log(comments);
-
   return (
     <div className='scroll-container'>
       {visibleComments.map((comment, index) => (

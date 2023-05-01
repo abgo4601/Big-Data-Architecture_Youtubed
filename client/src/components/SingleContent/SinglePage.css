@@ -8,6 +8,11 @@
   width: 1200px;
   z-index: 1000;
 }
+.widgetStyle {
+  background: none;
+  border: none;
+}
+
 .text-loading {
   z-index: 1000;
   color: #d7eef5;
