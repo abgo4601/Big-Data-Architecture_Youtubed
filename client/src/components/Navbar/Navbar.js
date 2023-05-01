@@ -10,12 +10,19 @@ $(function () {
   });
 });
 
+const handleLogout = () => {
+  localStorage.clear("token");
+};
+
 const Navbar = () => {
   return (
     <>
       <nav className='navbar navbar-expand navbar-light fixed-top'>
         <Link className='navbar-brand' to='/home'>
           {"Home"}
+        </Link>
+        <Link className='navbar-brand' to='/login' onClick={handleLogout}>
+          {"logout"}
         </Link>
       </nav>
     </>
