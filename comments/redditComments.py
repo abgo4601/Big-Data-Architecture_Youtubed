@@ -77,6 +77,7 @@ def updateCommentToEs(searchString: str):
             #            'comment': list.get('body'),
             #            'timestamp': list.get('created_utc')
             #        })
+            if "BOT" not in list.get('body').upper():    
                comment['comment'] = list.get('body')
                comment['timestamp'] = list.get('created_utc')
                sendToKafka(comment,searchString)
