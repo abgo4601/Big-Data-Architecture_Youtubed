@@ -1,0 +1,99 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-deployment
+spec:
+  selector:
+    matchLabels:
+      component: backend
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        component: backend
+    spec:
+      containers:
+        - name: backend
+          image: gcr.io/big-data-arch-youtubed/backend
+          ports:
+            - containerPort: 5000
+          env:
+            - name: DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: my-config
+                  key: DB_NAME
+            - name: CLUSTER_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: my-config
+                  key: CLUSTER_URL
+            - name: SECRET_KEY
+              valueFrom:
+                configMapKeyRef:
+                  name: my-config
+                  key: SECRET_KEY
+            - name: ALGORITHM
+              valueFrom:
+                configMapKeyRef:
+                  name: my-config
+                  key: ALGORITHM
+            - name: OPENAI_API_KEY
+              valueFrom:
+                configMapKeyRef:
+                  name: my-config
+                  key: OPENAI_API_KEY
+            - name: TMDB_KEY
+              valueFrom:
+                configMapKeyRef:
+                  name: my-config
+                  key: TMDB_KEY
+            - name: SPOTIFY_CLIENT_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: my-config
+                  key: SPOTIFY_CLIENT_ID
+            - name: SPOTIFY_CLIENT_SECRET
+              valueFrom:
+                configMapKeyRef:
+                  name: my-config
+                  key: SPOTIFY_CLIENT_SECRET
+            - name: GOOGLE_CLIENT_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: my-config
+                  key: GOOGLE_CLIENT_ID
+            - name: GOOGLE_PROJECT_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: my-config
+                  key: GOOGLE_PROJECT_ID
+            - name: GOOGLE_CLIENT_SECRET
+              valueFrom:
+                configMapKeyRef:
+                  name: my-config
+                  key: GOOGLE_CLIENT_SECRET
+            - name: GOOGLE_REDIRECT_URIS
+              valueFrom:
+                configMapKeyRef:
+                  name: my-config
+                  key: GOOGLE_REDIRECT_URIS
+            - name: BACKEND_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: my-config
+                  key: BACKEND_URL
+            - name: FRONTEND_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: my-config
+                  key: FRONTEND_URL
+            - name: FLASK_APP
+              value: finTest.py
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/config
+      volumes:
+        - name: config-volume
+          configMap:
+            name: my-config
